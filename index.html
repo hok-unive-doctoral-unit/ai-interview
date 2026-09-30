@@ -9,7 +9,6 @@
     --primary: #2c4d75;
     --primary-hover: #1e3654;
     --accent-red: #e74c3c;
-    --accent-green: #27ae60;
     --bg-color: #f0f4f8;
     --card-bg: #ffffff;
   }
@@ -44,17 +43,29 @@
 
   .content { padding: 24px; }
 
-  /* アバター画像表示エリア */
+  /* アバター表示エリア */
   .avatar-container {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 20px;
   }
-  .avatar-img {
-    width: 260px;
-    height: 260px;
-    object-fit: cover;
-    border-radius: 20px;
+  .avatar-wrapper {
+    width: 220px;
+    height: 220px;
+    border-radius: 16px;
+    overflow: hidden;
     box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    background: #eef5fc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--primary);
+  }
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .avatar-status {
     margin-top: 10px;
@@ -63,7 +74,6 @@
     font-weight: 600;
   }
 
-  /* 質問カード */
   .question-box {
     background: #eef5fc;
     border-left: 5px solid var(--primary);
@@ -74,29 +84,28 @@
   .question-title { font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 4px; }
   .question-text { font-size: 16px; font-weight: bold; color: #1a252f; line-height: 1.5; }
 
-  /* テキスト・回答入力 */
   textarea {
     width: 100%;
-    height: 100px;
+    height: 110px;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 14px;
     box-sizing: border-box;
     resize: vertical;
+    font-family: inherit;
   }
 
-  /* ボタンエリア */
   .button-group {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     justify-content: center;
-    margin-top: 16px;
+    margin-top: 18px;
     flex-wrap: wrap;
   }
   button {
     border: none;
-    padding: 12px 20px;
+    padding: 12px 24px;
     border-radius: 8px;
     font-size: 14px;
     font-weight: bold;
@@ -104,24 +113,25 @@
     transition: all 0.2s;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
+    min-width: 120px;
   }
+  .btn-mic { background: var(--accent-red); color: #fff; }
+  .btn-mic:hover { background: #c0392b; }
   .btn-primary { background: var(--primary); color: #fff; }
   .btn-primary:hover { background: var(--primary-hover); }
-  .btn-mic { background: var(--accent-red); color: #fff; }
-  .btn-skip { background: #e74c3c; color: #fff; }
-  .btn-secondary { background: #7f8c8d; color: #fff; }
-  button:disabled { background: #bdc3c7; cursor: not-allowed; }
+  .btn-skip { background: #7f8c8d; color: #fff; }
+  .btn-skip:hover { background: #687576; }
+  button:disabled { background: #bdc3c7 !important; cursor: not-allowed; opacity: 0.7; }
 
-  /* 進捗バー */
-  .progress-container { margin-top: 20px; text-align: center; }
+  .progress-container { margin-top: 24px; text-align: center; }
   .progress-bar { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
   .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
   .progress-text { font-size: 12px; color: #7f8c8d; }
 
   .hidden { display: none !important; }
   
-  /* 設定フォーム用 */
   .form-group { margin-bottom: 14px; }
   .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
   .form-group input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
@@ -156,39 +166,36 @@
         </label>
       </div>
 
-      <!-- GAS URL -->
+      <!-- GAS Web App URL -->
       <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbyZLmzYt2qUVojXi6DGvqcaQflzjDuiB9KUXbdD4AckVZzj1XCRQwtnIgKDSwuTgPj8bQ/exec">
 
       <div style="text-align: center; margin-top: 24px;">
-        <button id="startBtn" class="btn-primary" disabled style="width: 100%; justify-content: center; padding: 14px;">インタビューを開始する</button>
+        <button id="startBtn" class="btn-primary" disabled style="width: 100%; padding: 14px;">インタビューを開始する</button>
       </div>
     </div>
 
     <!-- 2. インタビュー対話画面 -->
     <div id="interviewSection" class="hidden">
-      <!-- 中央AIアバター画像 -->
       <div class="avatar-container">
-        <img src="avatar.png" alt="AI Interviewer" class="avatar-img" id="avatarImg">
+        <div class="avatar-wrapper">
+          <img src="avatar_close.jpg" alt="AI Interviewer" class="avatar-img" id="avatarImg">
+        </div>
         <div class="avatar-status" id="avatarStatus">回答をお待ちしています</div>
       </div>
 
-      <!-- 質問テキストボックス -->
       <div class="question-box">
         <div class="question-title">質問</div>
         <div class="question-text" id="questionText">読み込み中...</div>
       </div>
 
-      <!-- 回答入力エリア -->
-      <textarea id="answerInput" placeholder="ここに回答が表示されます（マイクで話すか、直接入力してください）..."></textarea>
+      <textarea id="answerInput" placeholder="ここに回答を入力するか、マイクボタンを押してお話しください..."></textarea>
 
-      <!-- 操作ボタン群 -->
       <div class="button-group">
-        <button id="micToggleBtn" class="btn-mic">🎙️ 聞き始める</button>
-        <button id="submitBtn" class="btn-primary">✉️ 送信</button>
+        <button id="micToggleBtn" class="btn-mic">🎙️ 話し始める</button>
+        <button id="submitBtn" class="btn-primary">✉️ 送信する</button>
         <button id="skipBtn" class="btn-skip">⏩ スキップ</button>
       </div>
 
-      <!-- 進捗バー -->
       <div class="progress-container">
         <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
         <div class="progress-text" id="progressText">質問 1 / 6</div>
@@ -204,7 +211,7 @@
 
       <div class="button-group" style="flex-direction: column; gap: 10px;">
         <button id="previewBtn" class="btn-primary hidden" style="justify-content: center;">🌐 Web掲載イメージを見る</button>
-        <button id="downloadTranscriptBtn" class="btn-secondary" style="justify-content: center;">📝 文字起こし全文をダウンロード</button>
+        <button id="downloadTranscriptBtn" class="btn-skip" style="justify-content: center;">📝 文字起こし全文をダウンロード</button>
       </div>
     </div>
 
@@ -212,7 +219,6 @@
 </div>
 
 <script>
-// 最新の質問項目セット（6問）
 const QUESTION_SET = [
   '現在のご所属と、どのような研究・お仕事をされているか教えてください。',
   'これまでの主なキャリアのご経歴について教えてください。',
@@ -224,14 +230,13 @@ const QUESTION_SET = [
 
 let qIndex = 0;
 let followupCount = 0;
-const MAX_FOLLOWUP = 1; // 1質問あたり最大1回の深掘り
+const MAX_FOLLOWUP = 1;
 let transcript = [];
 let sessionId = '';
 let currentQuestionText = '';
-let awaitingSubmit = false;
+let isProcessing = false;
 let generatedDraftHtml = '';
 
-// DOM要素
 const setupSection = document.getElementById('setupSection');
 const interviewSection = document.getElementById('interviewSection');
 const finishSection = document.getElementById('finishSection');
@@ -241,29 +246,58 @@ const startBtn = document.getElementById('startBtn');
 const questionText = document.getElementById('questionText');
 const answerInput = document.getElementById('answerInput');
 const avatarStatus = document.getElementById('avatarStatus');
+const avatarImg = document.getElementById('avatarImg');
 const micToggleBtn = document.getElementById('micToggleBtn');
 const submitBtn = document.getElementById('submitBtn');
 const skipBtn = document.getElementById('skipBtn');
 const progressFill = document.getElementById('progressFill');
 const progressText = document.getElementById('progressText');
 
-// 同意チェック
 consent.addEventListener('change', updateStartStatus);
 intervieweeName.addEventListener('input', updateStartStatus);
 function updateStartStatus() {
   startBtn.disabled = !(consent.checked && intervieweeName.value.trim().length > 0);
 }
 
-// 音声読み上げ
+// アバター画像切り替え
+function setAvatarState(speaking) {
+  if (speaking) {
+    avatarImg.src = 'avatar_open.jpg';
+  } else {
+    avatarImg.src = 'avatar_close.jpg';
+  }
+}
+
+// 音声読み上げ（アバター切り替え機能＆安全タイムアウト付き）
 function speak(text) {
   return new Promise(resolve => {
-    if (!document.getElementById('enableSpeech').checked) { resolve(); return; }
+    if (!document.getElementById('enableSpeech').checked || !('speechSynthesis' in window)) {
+      resolve();
+      return;
+    }
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
     u.rate = 1.0;
-    u.onend = resolve;
-    u.onerror = resolve;
+
+    let hasEnded = false;
+    const endHandler = () => {
+      if (!hasEnded) {
+        hasEnded = true;
+        setAvatarState(false);
+        resolve();
+      }
+    };
+
+    u.onstart = () => {
+      setAvatarState(true);
+    };
+    u.onend = endHandler;
+    u.onerror = endHandler;
+
+    // 音声APIが途中で引っかかった場合の安全解除（最大8秒）
+    setTimeout(endHandler, 8000);
+
     speechSynthesis.speak(u);
   });
 }
@@ -282,32 +316,30 @@ function initRecognition() {
 
   recognition.onstart = () => {
     recognizing = true;
-    micToggleBtn.textContent = '⏹ 停止する';
+    micToggleBtn.textContent = '⏹ 録音停止';
     avatarStatus.textContent = 'お話しください（音声認識中...）';
   };
 
   recognition.onresult = (e) => {
-    let interim = '';
     let final = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) {
-        final += e.results[i][0].transcript;
-      } else {
-        interim += e.results[i][0].transcript;
-      }
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
     }
-    if (final) answerInput.value += final;
+    if (final) {
+      if (answerInput.value) answerInput.value += ' ';
+      answerInput.value += final;
+    }
   };
 
   recognition.onend = () => {
     recognizing = false;
-    micToggleBtn.textContent = '🎙️ 聞き始める';
+    micToggleBtn.textContent = '🎙️ 話し始める';
     avatarStatus.textContent = '回答をお待ちしています';
   };
 }
 
 micToggleBtn.addEventListener('click', () => {
-  if (!SR) { alert('お使いのブラウザは音声認識に対応していません。'); return; }
+  if (!SR) { alert('お使いのブラウザは音声認識に対応していません。テキスト入力をご利用ください。'); return; }
   if (!recognition) initRecognition();
   if (recognizing) {
     recognition.stop();
@@ -316,7 +348,6 @@ micToggleBtn.addEventListener('click', () => {
   }
 });
 
-// 開始処理
 startBtn.addEventListener('click', () => {
   setupSection.classList.add('hidden');
   interviewSection.classList.remove('hidden');
@@ -325,7 +356,6 @@ startBtn.addEventListener('click', () => {
   askCurrent();
 });
 
-// 質問開始
 async function askCurrent() {
   currentQuestionText = QUESTION_SET[qIndex];
   questionText.textContent = currentQuestionText;
@@ -342,11 +372,10 @@ async function askCurrent() {
   avatarStatus.textContent = '回答をお待ちしています';
 }
 
-// 送信ボタン押下
 submitBtn.addEventListener('click', () => { processAnswer(answerInput.value.trim()); });
 skipBtn.addEventListener('click', () => { processAnswer('（スキップされました）'); });
 
-// AI 深掘り質問呼び出し
+// 深掘り質問の取得
 async function fetchAIFollowup(userAnswer) {
   const url = document.getElementById('gasUrl').value.trim();
   try {
@@ -364,53 +393,57 @@ async function fetchAIFollowup(userAnswer) {
 }
 
 async function processAnswer(answer) {
-  if (awaitingSubmit) return;
-  if (!answer) { alert('回答を入力するかマイクでお話しください。'); return; }
+  if (isProcessing) return;
+  if (!answer) { alert('回答を入力するか、マイクでお話しください。'); return; }
 
-  awaitingSubmit = true;
-  if (recognizing) recognition.stop();
-  speechSynthesis.cancel();
+  isProcessing = true;
+  submitBtn.disabled = true;
+  skipBtn.disabled = true;
+
+  if (recognizing && recognition) recognition.stop();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
 
   transcript.push({ speaker: '回答者', text: answer });
 
-  // 深掘り判定
-  let isFollowup = false;
+  // 深掘り質問判定（回答が5文字以上かつスキップでない場合）
   if (followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
     followupCount++;
-    avatarStatus.textContent = 'AIが回答を分析して次の深掘り質問を考えています...';
-    submitBtn.disabled = true;
+    avatarStatus.textContent = 'AIが回答を分析して深掘り質問を作成中...';
 
     const followupQ = await fetchAIFollowup(answer);
     currentQuestionText = followupQ;
     questionText.textContent = followupQ;
     transcript.push({ speaker: 'AI', text: followupQ });
     
-    submitBtn.disabled = false;
-    awaitingSubmit = false;
     avatarStatus.textContent = 'AIがお話し中...';
     await speak(followupQ);
     avatarStatus.textContent = '回答をお待ちしています';
     answerInput.value = '';
+
+    isProcessing = false;
+    submitBtn.disabled = false;
+    skipBtn.disabled = false;
     return;
   }
 
-  // 次の主質問へ
+  // 次の質問へ進む
   followupCount = 0;
   qIndex++;
-  awaitingSubmit = false;
 
   if (qIndex < QUESTION_SET.length) {
+    isProcessing = false;
+    submitBtn.disabled = false;
+    skipBtn.disabled = false;
     askCurrent();
   } else {
     // 終了処理
     interviewSection.classList.add('hidden');
     finishSection.classList.remove('hidden');
-    speak('お疲れ様でした。すべての質問が終了しました。ご協力ありがとうございました。');
+    await speak('お疲れ様でした。すべての質問が終了しました。ご協力ありがとうございました。');
     uploadFinalData();
   }
 }
 
-// 最終データ送信（ドライブ＆スプレッドシート保存）
 async function uploadFinalData() {
   const uploadStatus = document.getElementById('uploadStatus');
   uploadStatus.textContent = 'スプレッドシートおよびGoogleドライブへ保存中...';
@@ -440,14 +473,13 @@ async function uploadFinalData() {
         document.getElementById('previewBtn').classList.remove('hidden');
       }
     } else {
-      uploadStatus.textContent = '⚠️ 一部保存に失敗しました。';
+      uploadStatus.textContent = '⚠️ 保存中にエラーが発生しました: ' + (json.message || '不明なエラー');
     }
   } catch (e) {
-    uploadStatus.textContent = '❌ 送信中にエラーが発生しました。';
+    uploadStatus.textContent = '❌ 通信エラーが発生しました。';
   }
 }
 
-// ダウンロード・プレビュー機能
 document.getElementById('downloadTranscriptBtn').addEventListener('click', () => {
   const text = transcript.map(t => `【${t.speaker}】${t.text}`).join('\n\n');
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
