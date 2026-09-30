@@ -3,601 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>博士キャリア支援ロールモデル AIインタビュー</title>
+<title>博士キャリア支援 AIインタビュー</title>
 <style>
-  body{font-family:'Hiragino Sans','Noto Sans JP',sans-serif;max-width:760px;margin:0 auto;padding:24px;background:#fafafa;color:#222;line-height:1.7}
-  h1{font-size:20px;font-weight:600}
-  .card{background:#fff;border:1px solid #ddd;border-radius:10px;padding:20px;margin-bottom:16px}
-  .q{font-weight:600;color:#1d4f8c;margin-bottom:8px;font-size:17px}
-  textarea{width:100%;min-height:90px;font-size:15px;padding:8px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box}
-  button{background:#1d4f8c;color:#fff;border:none;border-radius:6px;padding:10px 16px;font-size:14px;cursor:pointer;margin-right:8px;margin-top:8px}
-  button.mic-btn{background:#e74c3c;font-weight:bold;font-size:15px;padding:12px 20px;}
-  button.secondary{background:#888}
-  button:disabled{background:#bbb;cursor:not-allowed}
-  .status{font-size:14px;color:#555;margin:10px 0;min-height:20px}
-  .status.listening{color:#c0392b;font-weight:600}
-  .status.thinking{color:#1d4f8c;font-weight:600}
-  .log{font-size:13px;color:#666;white-space:pre-wrap;margin-top:14px;border-top:1px dashed #ddd;padding-top:10px;max-height:260px;overflow-y:auto}
-  .progress{font-size:13px;color:#888;margin-bottom:8px}
-  .hidden{display:none}
-  .warn{background:#fff7e6;border:1px solid #f0c36d;border-radius:8px;padding:12px;font-size:13px;margin-bottom:16px}
-  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ccc;margin-right:6px}
-  .dot.on{background:#e74c3c;animation:pulse 1s infinite}
-  @keyframes pulse{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
-  .input-mode-box{background:#f0f4f8;border-radius:8px;padding:12px;margin-top:10px}
-  .guide-box{font-size:13px; font-weight:bold; color:#1d4f8c; margin-bottom:8px; background:#eef4fa; padding:8px; border-radius:4px; border-left:4px solid #1d4f8c;}
+  body { font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f4f6f9; color: #333; line-height: 1.6; }
+  .header-banner { background: #2c5282; color: white; text-align: center; padding: 20px; border-radius: 12px 12px 0 0; margin-bottom: 0; }
+  .header-banner h1 { margin: 0; font-size: 22px; font-weight: bold; }
+  .header-banner p { margin: 5px 0 0 0; font-size: 13px; opacity: 0.9; }
+  
+  .card { background: #fff; border-radius: 0 0 12px 12px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); margin-bottom: 20px; }
+  
+  /* 中央大きなアバター領域 */
+  .avatar-section { text-align: center; margin-bottom: 20px; }
+  .avatar-container { display: inline-block; position: relative; width: 280px; height: 280px; border-radius: 20px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.15); background: #eee; }
+  .avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .avatar-img.hidden { display: none; }
+  .status-badge { margin-top: 10px; font-size: 13px; font-weight: bold; color: #2b6cb0; height: 20px; }
+
+  /* 質問・回答ボックス */
+  .box { background: #ebf8ff; border-left: 4px solid #3182ce; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: left; }
+  .box-label { font-size: 12px; font-weight: bold; color: #2b6cb0; margin-bottom: 4px; }
+  .box-content { font-size: 16px; font-weight: 600; color: #2d3748; }
+
+  textarea { width: 100%; min-height: 80px; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; box-sizing: border-box; resize: vertical; }
+
+  /* ボタンレイアウト */
+  .btn-group { display: flex; justify-content: center; gap: 12px; margin: 20px 0; }
+  button { padding: 10px 24px; border-radius: 8px; border: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
+  .btn-primary { background: #2b6cb0; color: white; }
+  .btn-primary:hover { background: #2c5282; }
+  .btn-success { background: #ffffff; color: #2b6cb0; border: 2px solid #2b6cb0; }
+  .btn-danger { background: #e53e3e; color: white; }
+  button:disabled { background: #cbd5e0; border-color: #cbd5e0; cursor: not-allowed; color: #fff; }
+
+  .progress-bar { background: #edf2f7; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+  .progress-fill { background: #3182ce; height: 100%; width: 0%; transition: width 0.3s; }
+  .progress-text { text-align: center; font-size: 12px; color: #718096; }
+
+  .warn { background: #fffaf0; border: 1px solid #feebc8; border-radius: 8px; padding: 12px; font-size: 13px; margin-bottom: 16px; }
+  .hidden { display: none; }
 </style>
 </head>
 <body>
 
-<h1>博士キャリア支援 ロールモデル AIインタビュー(対話版)</h1>
-<div class="warn">
-  ※音声での回答・テキスト入力（キーボード）のどちらでも回答可能です。<br>
-  声を出せない環境の場合は「AIの質問を音声で読み上げる」のチェックを外し、テキスト欄に入力して送信してください。
+<div class="header-banner">
+  <h1>🎤 博士キャリア支援 AIインタビュー</h1>
+  <p>リアルタイム音声対話 ＋ AI分析</p>
 </div>
 
-<div id="setup" class="card">
-  <div id="initLoading" style="color:#1d4f8c;font-weight:bold;margin-bottom:12px;">🔄 質問データを取得中...（少々お待ちください）</div>
+<div class="card">
 
-  <label style="font-size:14px">お名前:<br><input type="text" id="intervieweeName" style="width:100%;height:36px;padding:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box" placeholder="例:山田太郎"></label>
-  <label style="font-size:14px;display:block;margin-top:10px">ご所属(大学名等):<br><input type="text" id="intervieweeAffiliation" style="width:100%;height:36px;padding:6px;border-radius:6px;border:1px solid #ccc;box-sizing:border-box" placeholder="例:〇〇大学"></label>
-  
-  <div style="margin-top:12px;font-size:14px;">
-    <label><input type="checkbox" id="enableSpeech" checked> AIの質問を音声で読み上げる</label>
-  </div>
-
-  <!-- GASのWeb App URL -->
-  <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbzKN7xQSiqHD-rEwjhJfEGHloe72734D8t8al1SVN5shtgD4ECYXps2aZgQ3MrfIkKC/exec">
-  
-  <label style="font-size:14px;display:block;margin-top:10px"><input type="checkbox" id="consent"> 録音・文字起こし・コンソーシアムWebサイトへの掲載に同意します</label>
-  <button id="startBtn" disabled>インタビューを開始する</button>
-</div>
-
-<div id="interview" class="hidden card">
-  <div class="progress" id="progress"></div>
-  <div class="q" id="questionText"></div>
-  <div class="status" id="statusLine"><span class="dot" id="dot"></span><span id="statusText">準備中…</span></div>
-  <div id="micNotice" style="font-size:13px;color:#c0392b;margin-top:6px;display:none;background:#fdecea;border:1px solid #f5b7b1;border-radius:6px;padding:8px;"></div>
-
-  <div class="input-mode-box">
-    <div class="guide-box">
-      ※音声で回答する場合は下の「音声入力を開始する」ボタンを押してお話しください。<br>
-      話す内容が長く、認識が途中で止まってしまった場合は、もう一度🎤ボタンを押せば続きから認識を再開できます。<br>
-      入力完了後、「回答を送信して次へ」を押してください。
+  <!-- 初期設定画面 -->
+  <div id="setup">
+    <div id="initLoading" style="color:#2b6cb0; font-weight:bold; margin-bottom:12px; text-align:center;">🔄 質問データを取得中...</div>
+    <div class="warn">
+      ご所属・お名前を入力し、利用同意にチェックを入れてインタビューを開始してください。
     </div>
-
-    <div style="margin-bottom:10px; text-align:center;">
-      <button id="micToggleBtn" class="mic-btn">🎤 音声入力を開始する</button>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px; font-weight:bold;">お名前:</label>
+      <input type="text" id="intervieweeName" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box;" placeholder="例: 山田 太郎">
     </div>
-
-    <textarea id="answerInput" placeholder="マイクボタンを押して話すか、ここに直接入力してください..."></textarea>
-    <div style="margin-top:8px;text-align:right;">
-      <button id="submitAnswerBtn">回答を送信して次へ</button>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:13px; font-weight:bold;">ご所属:</label>
+      <input type="text" id="intervieweeAffiliation" style="width:100%; padding:8px; border-radius:6px; border:1px solid #ccc; box-sizing:border-box;" placeholder="例: 〇〇大学">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label><input type="checkbox" id="enableSpeech" checked> AIの質問を音声で読み上げる</label><br>
+      <label><input type="checkbox" id="consent"> 録音・文字起こしデータ保存に同意します</label>
+    </div>
+    <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbzKN7xQSiqHD-rEwjhJfEGHloe72734D8t8al1SVN5shtgD4ECYXps2aZgQ3MrfIkKC/exec">
+    <div style="text-align:center;">
+      <button id="startBtn" class="btn-primary" disabled>インタビューを開始する</button>
     </div>
   </div>
 
-  <div id="aiLog" class="log"></div>
-  <div id="mobileNotice" style="display:none;font-size:12px;color:#888;margin-top:10px;">※スマホ利用時は、音声認識を優先するため録音データの保存は行っておりません（文字起こしは通常どおり保存されます）。</div>
-</div>
-
-<div id="finish" class="hidden card">
-  <p style="font-size:16px;font-weight:600;color:#1d4f8c;">インタビューが終了しました。ご協力ありがとうございました。</p>
-  
-  <div style="background:#f0f4f8;border-radius:8px;padding:16px;margin:20px 0;border-left:4px solid #1d4f8c;">
-    <p style="margin:0 0 12px 0;font-size:13px;font-weight:bold;color:#1d4f8c;">📋 自動処理の進捗状況</p>
-    <div style="font-size:12px;color:#555;">
-      <div style="display:flex;align-items:center;margin-bottom:12px;">
-        <span id="step1" style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#1d4f8c;color:#fff;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;font-size:11px;">✓</span>
-        <span style="flex-grow:1;">文字起こしをGoogleドライブに保存</span>
+  <!-- インタビューメイン画面 -->
+  <div id="interview" class="hidden">
+    
+    <!-- 中央大きなアバター表示領域 -->
+    <div class="avatar-section">
+      <div class="avatar-container">
+        <!-- 口閉じ画像（デフォルト表示） -->
+        <img id="avatarClose" class="avatar-img" src="avatar_close.jpg" alt="AIアバター(閉口)">
+        <!-- 口開け画像（初期は非表示） -->
+        <img id="avatarOpen" class="avatar-img hidden" src="avatar_open.jpg" alt="AIアバター(開口)">
       </div>
-      <div style="display:flex;align-items:flex-start;margin-bottom:12px;">
-        <span id="step2" style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#ff9800;color:#fff;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;font-size:11px;flex-shrink:0;animation:pulse 1s infinite;">⏳</span>
-        <div style="flex-grow:1;">
-          <div>AI が要約・Web原稿を生成中... (30秒程度)</div>
-          <div id="waitingMsg" style="background:#fff3cd;border-left:4px solid #ffc107;padding:8px 10px;border-radius:4px;margin-top:8px;font-size:12px;color:#333;font-weight:bold;display:block;">
-            📌 サンプル画像が見れるようになるまで少しお待ちください。<br>
-            このままページを閉じないでください。
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;align-items:center;">
-        <span id="step3" style="display:inline-block;width:24px;height:24px;border-radius:50%;background:#ccc;color:#fff;text-align:center;line-height:24px;font-weight:bold;margin-right:10px;font-size:11px;">3</span>
-        <span>Web原稿・サンプル画面を保存</span>
-      </div>
+      <div class="status-badge" id="statusText">準備中...</div>
     </div>
-  </div>
 
-  <p id="uploadStatus" style="font-size:13px;color:#1d4f8c;margin:16px 0;font-weight:bold;text-align:center;min-height:24px;white-space:pre-line;line-height:1.6;"></p>
-
-  <div id="previewSection" style="display:none;background:#fff7e6;border:2px solid #ff9800;border-radius:8px;padding:16px;margin:20px 0;">
-    <h3 style="margin:0 0 12px 0;font-size:13px;font-weight:bold;color:#ff9800;">✨ Web掲載イメージが完成しました！</h3>
-    <p style="margin:0 0 12px 0;font-size:12px;color:#333;">下のボタンからWeb原稿のサンプル画面を確認できます。このデータはコンソーシアムWebサイトのロールモデル紹介ページとして掲載予定です。</p>
-    <button id="previewButton" style="background:#ff9800;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-weight:bold;margin-right:8px;">🌐 Web掲載イメージを見る</button>
-    <button id="downloadHtml" style="background:#1d4f8c;color:#fff;border:none;padding:10px 16px;border-radius:6px;cursor:pointer;font-weight:bold;">📄 HTML版をダウンロード</button>
-  </div>
-
-  <div style="background:#f9f9f9;border-radius:8px;padding:16px;margin:20px 0;">
-    <h3 style="margin:0 0 12px 0;font-size:13px;font-weight:bold;color:#333;">📥 データの確認・ダウンロード</h3>
-    <p style="font-size:12px;color:#666;margin:0 0 12px 0;">以下の情報が GoogleDrive に自動保存されています。必要に応じてダウンロードしてください。</p>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-      <button id="downloadTranscript" style="background:#4285f4;color:#fff;padding:10px 12px;font-size:12px;border:none;border-radius:6px;cursor:pointer;">📝 文字起こし全文</button>
-      <button id="downloadDraft" style="background:#34a853;color:#fff;padding:10px 12px;font-size:12px;border:none;border-radius:6px;cursor:pointer;display:none;">📋 要約・Web原稿</button>
+    <!-- 質問表示ボックス -->
+    <div class="box">
+      <div class="box-label">質問</div>
+      <div class="box-content" id="questionText">準備中...</div>
     </div>
-    <button id="downloadAudio" style="width:100%;background:#ea4335;color:#fff;padding:10px 12px;font-size:12px;border:none;border-radius:6px;cursor:pointer;">🎵 録音データ</button>
-    <p style="font-size:11px;color:#999;margin:8px 0 0 0;">※スマホ利用時は、音声認識を優先するため録音データの保存は行っておりません</p>
+
+    <!-- 入力ボックス -->
+    <textarea id="answerInput" placeholder="ここに回答が表示されます（マイクで話すか、直接入力してください）..."></textarea>
+
+    <!-- 操作ボタン群 -->
+    <div class="btn-group">
+      <button id="micToggleBtn" class="btn-primary">🎤 聞き始める</button>
+      <button id="submitAnswerBtn" class="btn-success">■ 送信</button>
+      <button id="skipBtn" class="btn-danger">⏩ スキップ</button>
+    </div>
+
+    <!-- 進捗バー -->
+    <div class="progress-bar"><div id="progressFill" class="progress-fill"></div></div>
+    <div class="progress-text" id="progressText">質問 0 / 0</div>
+
   </div>
+
+  <!-- 終了画面 -->
+  <div id="finish" class="hidden" style="text-align:center;">
+    <h2 style="color:#2b6cb0;">インタビュー完了</h2>
+    <p>ご協力ありがとうございました。データは正常に記録されました。</p>
+  </div>
+
 </div>
 
 <script>
-let QUESTION_SET = []; 
-let isQuestionsLoaded = false;
+let QUESTION_SET = [];
 let qIndex = 0;
-let followupCount = 0;
-const MAX_FOLLOWUP = 1;
 let transcript = [];
-let sessionId = '';
-let currentQuestionText = "";
-let awaitingSubmit = false;
-let isUploading = false;
-let generatedDraftText = "";
-let generatedDraftHtml = "";
+let isSpeechEnabled = true;
+let lipSyncInterval = null;
 
-const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-// GASから質問リストを取得（CORSおよびリダイレクト対応）
-async function fetchQuestionsFromGAS() {
+// GASからの質問取得
+async function fetchQuestions() {
   const url = document.getElementById('gasUrl').value.trim();
-  const loadingEl = document.getElementById('initLoading');
   try {
     const res = await fetch(url, { method: 'GET', redirect: 'follow' });
     const data = await res.json();
-    if (data && data.status === 'ok' && Array.isArray(data.questions) && data.questions.length > 0) {
+    if (data && data.status === 'ok' && data.questions) {
       QUESTION_SET = data.questions;
-      isQuestionsLoaded = true;
-      if (loadingEl) {
-        loadingEl.style.color = '#27ae60';
-        loadingEl.textContent = '✅ 準備が完了しました。お名前を入力して開始してください。';
-      }
+      document.getElementById('initLoading').textContent = '✅ 準備完了';
+      document.getElementById('initLoading').style.color = '#38a169';
       updateStartBtn();
-      return;
     }
   } catch (e) {
-    console.error('GASからの質問取得エラー:', e);
-  }
-  
-  if (loadingEl) {
-    loadingEl.style.color = '#c0392b';
-    loadingEl.textContent = '❌ 質問データの読み込みに失敗しました。ページを再読み込みしてください。';
+    document.getElementById('initLoading').textContent = '❌ 質問の取得に失敗しました';
   }
 }
 
-const setupDiv = document.getElementById('setup');
-const interviewDiv = document.getElementById('interview');
-const finishDiv = document.getElementById('finish');
 const consent = document.getElementById('consent');
+const nameInput = document.getElementById('intervieweeName');
 const startBtn = document.getElementById('startBtn');
-const questionText = document.getElementById('questionText');
-const progress = document.getElementById('progress');
-const answerInput = document.getElementById('answerInput');
-const statusLine = document.getElementById('statusLine');
-const statusText = document.getElementById('statusText');
-const dot = document.getElementById('dot');
-const aiLog = document.getElementById('aiLog');
-const submitAnswerBtn = document.getElementById('submitAnswerBtn');
-const enableSpeech = document.getElementById('enableSpeech');
-const micToggleBtn = document.getElementById('micToggleBtn');
 
 consent.addEventListener('change', updateStartBtn);
-document.getElementById('intervieweeName').addEventListener('input', updateStartBtn);
+nameInput.addEventListener('input', updateStartBtn);
 
-function updateStartBtn(){
-  const nameOk = document.getElementById('intervieweeName').value.trim().length > 0;
-  startBtn.disabled = !(consent.checked && nameOk && isQuestionsLoaded);
-}
-
-function setStatus(text, mode){
-  statusText.textContent = text;
-  statusLine.className = 'status' + (mode?(' '+mode):'');
-  dot.className = 'dot' + (mode==='listening' ? ' on' : '');
-}
-function logLine(speaker, text){
-  aiLog.textContent += `【${speaker}】${text}\n\n`;
-  aiLog.scrollTop = aiLog.scrollHeight;
-}
-function showMicNotice(msg){
-  const el = document.getElementById('micNotice');
-  if(el){ el.textContent = msg; el.style.display = 'block'; }
-}
-function hideMicNotice(){
-  const el = document.getElementById('micNotice');
-  if(el){ el.style.display = 'none'; }
+function updateStartBtn() {
+  startBtn.disabled = !(consent.checked && nameInput.value.trim().length > 0 && QUESTION_SET.length > 0);
 }
 
-let mediaRecorder, audioChunks = [], mediaStream;
-async function setupAudioRecording(){
-  if (isMobile) {
-    const mn = document.getElementById('mobileNotice');
-    if(mn) mn.style.display = 'block';
-    return;
-  }
-  try{
-    mediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
-    const options = { mimeType: 'audio/webm', audioBitsPerSecond: 16000 };
-    mediaRecorder = new MediaRecorder(mediaStream, MediaRecorder.isTypeSupported('audio/webm') ? options : {});
-    mediaRecorder.ondataavailable = e => { if(e.data.size > 0) audioChunks.push(e.data); };
-    mediaRecorder.start();
-  }catch(e){
-    console.log('マイクオフまたは非許可モード');
-  }
+// 高速な画像切り替えによる「口パク」処理
+function startLipSync() {
+  const imgClose = document.getElementById('avatarClose');
+  const imgOpen = document.getElementById('avatarOpen');
+  
+  // ランダムなタイミングで口を開閉（120ms〜200ms間隔）
+  lipSyncInterval = setInterval(() => {
+    if (Math.random() > 0.3) {
+      imgClose.classList.toggle('hidden');
+      imgOpen.classList.toggle('hidden');
+    }
+  }, 150);
 }
 
-function speak(text){
-  return new Promise(resolve=>{
-    if(!enableSpeech.checked) { resolve(); return; }
+function stopLipSync() {
+  if (lipSyncInterval) clearInterval(lipSyncInterval);
+  document.getElementById('avatarClose').classList.remove('hidden');
+  document.getElementById('avatarOpen').classList.add('hidden');
+}
+
+// 音声合成（発声）
+function speak(text) {
+  return new Promise((resolve) => {
+    if (!document.getElementById('enableSpeech').checked) { resolve(); return; }
+    
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
     u.rate = 1.0;
-    u.onend = () => { resolve(); };
-    u.onerror = () => { resolve(); };
+
+    u.onstart = () => {
+      document.getElementById('statusText').textContent = '話しています...';
+      startLipSync();
+    };
+
+    u.onend = () => {
+      stopLipSync();
+      document.getElementById('statusText').textContent = '回答をお待ちしています';
+      resolve();
+    };
+
+    u.onerror = () => {
+      stopLipSync();
+      resolve();
+    };
+
     speechSynthesis.speak(u);
   });
 }
 
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let recognizing = false;
-let confirmedText = '';
-
-function initRecognition(){
-  if(!SR) {
-    showMicNotice('お使いのブラウザは音声認識に対応していません。回答欄にキーボードで直接ご入力ください。');
-    return;
-  }
-  if(recognition) {
-    try { recognition.abort(); } catch(e){}
-  }
-  
-  recognition = new SR();
-  recognition.lang = 'ja-JP';
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  
-  recognition.onstart = ()=>{ 
-    recognizing = true; 
-    setStatus('音声認識中...お話しください', 'listening'); 
-    micToggleBtn.textContent = '⏹ 音声入力を停止する';
-    micToggleBtn.style.background = '#27ae60';
-    hideMicNotice();
-  };
-  
-  recognition.onresult = (e)=>{
-    if (awaitingSubmit) return;
-    let interim = '';
-    for(let i = e.resultIndex; i < e.results.length; i++){
-      const transcriptText = e.results[i][0].transcript;
-      if(e.results[i].isFinal){ 
-        if (!confirmedText.endsWith(transcriptText.trim())) {
-          confirmedText = (confirmedText + ' ' + transcriptText).trim();
-        }
-      } else { 
-        interim += transcriptText; 
-      }
-    }
-    answerInput.value = (confirmedText + ' ' + interim).trim();
-  };
-
-  recognition.onerror = (e)=>{
-    if(e.error !== 'no-speech' && e.error !== 'aborted'){
-      showMicNotice('音声認識エラーが発生しました。もう一度🎤ボタンを押すか、回答欄に直接ご入力ください。');
-    }
-    stopListening();
-  };
-
-  recognition.onend = ()=>{ 
-    stopListening();
-  };
-}
-
-function startListening(){
-  if(!SR) { showMicNotice('このブラウザは音声入力に対応していません。回答欄にキーボードでご入力ください。'); return; }
-  confirmedText = answerInput.value.trim();
-  if(!recognition) initRecognition();
-  
-  if(!recognizing){
-    try{ 
-      recognition.start(); 
-    }catch(e){
-      initRecognition();
-      try{ recognition.start(); }catch(err){
-        showMicNotice('音声認識を開始できませんでした。回答欄に直接ご入力ください。');
-      }
-    }
-  }
-}
-
-function stopListening(){
-  recognizing = false;
-  if(recognition){ 
-    try{ recognition.stop(); }catch(e){} 
-  }
-  micToggleBtn.textContent = '🎤 音声入力を開始する';
-  micToggleBtn.style.background = '#e74c3c';
-  if(!awaitingSubmit){
-    setStatus('ご回答を入力または「🎤音声入力を開始する」を押してお話しください', '');
-  }
-}
-
-micToggleBtn.addEventListener('click', ()=>{
-  if(speechSynthesis.speaking) speechSynthesis.cancel();
-  if(recognizing){
-    stopListening();
-  } else {
-    startListening();
-  }
+// インタビュー開始
+startBtn.addEventListener('click', () => {
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('interview').classList.remove('hidden');
+  askQuestion();
 });
 
-submitAnswerBtn.addEventListener('click', ()=>{ submitTurn(); });
-
-function askCurrent(){
-  currentQuestionText = QUESTION_SET[qIndex];
-  questionText.textContent = currentQuestionText;
-  progress.textContent = `質問 ${qIndex+1} / ${QUESTION_SET.length}`;
-  transcript.push({speaker:'AI', text: currentQuestionText});
-  logLine('AI', currentQuestionText);
-  runTurn();
-}
-
-async function runTurn(){
-  awaitingSubmit = false; 
-  answerInput.value = '';
-  confirmedText = ''; 
-  stopListening(); 
-  hideMicNotice();
-
-  setStatus('AIが質問を表示中…', 'thinking');
-  await speak(questionText.textContent);
-  
-  setStatus('ご回答を入力または「🎤音声入力を開始する」を押してお話しください', '');
-}
-
-async function generateAIFollowup(userAnswer) {
-  const url = document.getElementById('gasUrl').value.trim();
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      redirect: 'follow',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        mode: 'followup',
-        currentQuestion: currentQuestionText,
-        userAnswer: userAnswer
-      })
-    });
-    const data = await res.json();
-    if (data.status === 'ok' && data.question) {
-      return data.question;
-    }
-  } catch (e) {
-    console.error('GAS Followup Error:', e);
-  }
-  return "素敵なお話をありがとうございます！差し支えなければ、その点についてもう少し詳しく教えていただけますか？";
-}
-
-answerInput.addEventListener('input', () => {
-  if (speechSynthesis.speaking) speechSynthesis.cancel();
-  confirmedText = answerInput.value;
-});
-
-async function submitTurn(){
-  if(awaitingSubmit) return;
-  const answer = answerInput.value.trim();
-  if(!answer){ alert('回答を入力するか、音声でお話しください。'); return; }
-
-  speechSynthesis.cancel();
-  awaitingSubmit = true;
-  stopListening();
-
-  submitAnswerBtn.disabled = true;
-  submitAnswerBtn.textContent = '送信中...';
-
-  transcript.push({speaker:'専門委員', text: answer});
-  logLine('専門委員', answer);
-
-  answerInput.value = '';
-  confirmedText = '';
-
-  let isFollowup = false;
-  
-  if(qIndex < QUESTION_SET.length - 1 && followupCount < MAX_FOLLOWUP && answer.length >= 3){
-    followupCount++;
-    setStatus('AIが回答を分析し、深掘り質問を考えています…（少しお待ちください）', 'thinking');
-    
-    const followupQ = await generateAIFollowup(answer);
-    currentQuestionText = followupQ;
-    questionText.textContent = followupQ;
-    progress.textContent = `質問 ${qIndex+1} / ${QUESTION_SET.length} (深掘り)`;
-    transcript.push({speaker:'AI', text: followupQ});
-    logLine('AI', followupQ);
-    isFollowup = true;
-  }
-
-  submitAnswerBtn.disabled = false;
-  submitAnswerBtn.textContent = '回答を送信して次へ';
-
-  if(isFollowup){
-    runTurn(); 
+async function askQuestion() {
+  if (qIndex >= QUESTION_SET.length) {
+    document.getElementById('interview').classList.add('hidden');
+    document.getElementById('finish').classList.remove('hidden');
     return;
   }
 
-  followupCount = 0;
+  const q = QUESTION_SET[qIndex];
+  document.getElementById('questionText').textContent = q;
+  document.getElementById('answerInput').value = '';
+  
+  // 進捗更新
+  const total = QUESTION_SET.length;
+  document.getElementById('progressFill').style.width = `${((qIndex + 1) / total) * 100}%`;
+  document.getElementById('progressText').textContent = `質問 ${qIndex + 1} / ${total}`;
+
+  await speak(q);
+}
+
+document.getElementById('submitAnswerBtn').addEventListener('click', () => {
   qIndex++;
-  
-  if(qIndex < QUESTION_SET.length){ 
-    askCurrent(); 
-  } else {
-    submitAnswerBtn.disabled = true;
-    submitAnswerBtn.textContent = '送信中...';
-
-    if(mediaRecorder && mediaRecorder.state!=='inactive') mediaRecorder.stop();
-
-    await speak('ご協力ありがとうございました。すべてのインタビューが完了しました。手元にファイルを保存される方はダウンロード後に、不要な方はそのままブラウザを閉じて終了してください。');
-
-    interviewDiv.classList.add('hidden');
-    finishDiv.classList.remove('hidden');
-    autoUploadTranscriptAndAudio();
-  }
-}
-
-startBtn.addEventListener('click', async ()=>{
-  setupDiv.classList.add('hidden');
-  interviewDiv.classList.remove('hidden');
-  await setupAudioRecording();
-  initRecognition();
-  qIndex = 0; followupCount = 0;
-  sessionId = new Date().toISOString().replace(/[-:T]/g,'').slice(0,15);
-  askCurrent();
+  askQuestion();
 });
 
-function blobToBase64(blob){
-  return new Promise((resolve,reject)=>{
-    const r = new FileReader();
-    r.onload = ()=> resolve(r.result.split(',')[1]);
-    r.onerror = reject;
-    r.readAsDataURL(blob);
-  });
-}
-
-async function uploadToGAS(payload){
-  const url = document.getElementById('gasUrl').value.trim();
-  if(!url) return { ok: false };
-  try{
-    const res = await fetch(url, {
-      method:'POST',
-      redirect: 'follow',
-      headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify(payload)
-    });
-    return await res.json();
-  }catch(e){
-    return { ok: false, error: e.toString() };
-  }
-}
-
-async function autoUploadTranscriptAndAudio(){
-  if(isUploading) return;
-  isUploading = true;
-
-  const uploadStatus = document.getElementById('uploadStatus');
-  uploadStatus.textContent = 'データと原稿をGoogleドライブへ送信中…（AI原稿生成のため15秒ほどかかります）';
-  
-  const name = document.getElementById('intervieweeName').value.trim() || '専門委員';
-  const affiliation = document.getElementById('intervieweeAffiliation').value.trim();
-  
-  const payload = { 
-    name: name, 
-    affiliation: affiliation, 
-    sessionId: sessionId, 
-    transcript: transcript.map(t=>`【${t.speaker}】${t.text}`).join('\n\n') 
-  };
-  
-  if(!isMobile && audioChunks.length > 0){
-    const blob = new Blob(audioChunks, {type:'audio/webm'});
-    payload.audioBase64 = await blobToBase64(blob);
-    payload.audioMime = 'audio/webm';
-  }
-  
-  const res = await uploadToGAS(payload);
-  if (res && res.status === 'ok') {
-    document.getElementById('step2').innerHTML = '✓';
-    document.getElementById('step2').style.background = '#1d4f8c';
-    document.getElementById('step2').style.animation = 'none';
-    document.getElementById('waitingMsg').style.display = 'none';
-    
-    document.getElementById('step3').innerHTML = '✓';
-    document.getElementById('step3').style.background = '#27ae60';
-    
-    let msg = '✅ テキスト処理が完了しました！';
-    let hasQuotaError = false;
-    
-    if(res.errors && res.errors.length > 0) {
-      for(let i = 0; i < res.errors.length; i++) {
-        if(res.errors[i].includes('QUOTA_EXCEEDED')) {
-          hasQuotaError = true;
-        }
-      }
-    }
-    
-    if(hasQuotaError) {
-      msg = '⚠️ 無料枠の利用制限に達しました。\n\n' +
-            'Gemini APIの無料枠制限に達しました。\n' +
-            '文字起こし・録音データはGoogleドライブに正常に保存されました。';
-    } else if(res.errors && res.errors.length > 0) {
-      msg += ' (※生成処理のエラー)';
-    }
-    
-    uploadStatus.textContent = msg;
-
-    if (res.draftText) {
-      generatedDraftText = res.draftText;
-      document.getElementById('downloadDraft').style.display = 'inline-block';
-    }
-
-    if (res.draftHtml) {
-      generatedDraftHtml = res.draftHtml;
-      document.getElementById('previewSection').style.display = 'block';
-    }
-
-  } else {
-    uploadStatus.textContent = '自動保存に失敗しました。';
-  }
-}
-
-function download(filename, blobOrText, type){
-  const blob = (blobOrText instanceof Blob) ? blobOrText : new Blob([blobOrText], {type: type||'text/plain;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-}
-
-document.getElementById('downloadTranscript').addEventListener('click', ()=>{
-  download('インタビュー文字起こし.txt', transcript.map(t=>`【${t.speaker}】${t.text}`).join('\n\n'));
-});
-document.getElementById('downloadAudio').addEventListener('click', ()=>{
-  if(audioChunks.length===0){ alert('録音データはありません（※スマホ接続時は無効化されます）'); return; }
-  const blob = new Blob(audioChunks, {type:'audio/webm'});
-  download('インタビュー録音.webm', blob);
+document.getElementById('skipBtn').addEventListener('click', () => {
+  qIndex++;
+  askQuestion();
 });
 
-document.getElementById('downloadDraft').addEventListener('click', ()=>{
-  if(!generatedDraftText){ alert('生成された原稿データがありません'); return; }
-  download('要約とWeb原稿.txt', generatedDraftText);
-});
-
-const previewButton = document.getElementById('previewButton');
-if (previewButton) {
-  previewButton.addEventListener('click', ()=>{
-    if(!generatedDraftHtml){ alert('生成されたHTMLデータがありません'); return; }
-    const blob = new Blob([generatedDraftHtml], { type: 'text/html;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    window.open(url, '_blank');
-  });
-}
-
-const downloadHtml = document.getElementById('downloadHtml');
-if (downloadHtml) {
-  downloadHtml.addEventListener('click', ()=>{
-    if(!generatedDraftHtml){ alert('生成されたHTMLデータがありません'); return; }
-    const name = document.getElementById('intervieweeName').value.trim().replace(/[\\\/:*?"<>|]/g, '_') || '要約とWeb原稿';
-    download(name + '.html', generatedDraftHtml, 'text/html;charset=utf-8');
-  });
-}
-
-// 画面表示時にGASから質問を取得
-window.addEventListener('DOMContentLoaded', () => {
-  fetchQuestionsFromGAS();
-});
+window.addEventListener('DOMContentLoaded', fetchQuestions);
 </script>
+
 </body>
 </html>
