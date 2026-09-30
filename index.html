@@ -123,8 +123,6 @@
 <script>
 let QUESTION_SET = [];
 let qIndex = 0;
-let transcript = [];
-let isSpeechEnabled = true;
 let lipSyncInterval = null;
 
 // GASからの質問取得
@@ -155,12 +153,11 @@ function updateStartBtn() {
   startBtn.disabled = !(consent.checked && nameInput.value.trim().length > 0 && QUESTION_SET.length > 0);
 }
 
-// 高速な画像切り替えによる「口パク」処理
+// 口パク処理
 function startLipSync() {
   const imgClose = document.getElementById('avatarClose');
   const imgOpen = document.getElementById('avatarOpen');
   
-  // ランダムなタイミングで口を開閉（120ms〜200ms間隔）
   lipSyncInterval = setInterval(() => {
     if (Math.random() > 0.3) {
       imgClose.classList.toggle('hidden');
@@ -175,7 +172,23 @@ function stopLipSync() {
   document.getElementById('avatarOpen').classList.add('hidden');
 }
 
-// 音声合成（発声）
+// 男性の音声を検索してセットする関数
+function getMaleVoice() {
+  const voices = speechSynthesis.getVoices();
+  // 日本語のボイスの中から「男性（Keita, Ichiro, Maleなど）」または標準の日本語声を検索
+  const maleKeywords = ['male', 'keita', 'ichiro', 'takumi', '男性'];
+  
+  // 1. キーワードに一致する日本語男性声を検索
+  let maleVoice = voices.find(v => v.lang.startsWith('ja') && maleKeywords.some(kw => v.name.toLowerCase().includes(kw)));
+  
+  // 2. 見つからない場合、任意の日本語音声を採用
+  if (!maleVoice) {
+    maleVoice = voices.find(v => v.lang.startsWith('ja'));
+  }
+  return maleVoice;
+}
+
+// 音声読み上げ
 function speak(text) {
   return new Promise((resolve) => {
     if (!document.getElementById('enableSpeech').checked) { resolve(); return; }
@@ -183,7 +196,16 @@ function speak(text) {
     speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'ja-JP';
-    u.rate = 1.0;
+    
+    // 男性音声の設定
+    const selectedVoice = getMaleVoice();
+    if (selectedVoice) {
+      u.voice = selectedVoice;
+    }
+    
+    // 男性の声質に近づけるため、ピッチ（声の高さ）を少し下げ（0.85）、スピードを調整（0.95）
+    u.pitch = 0.85; 
+    u.rate = 0.95;
 
     u.onstart = () => {
       document.getElementById('statusText').textContent = '話しています...';
@@ -205,6 +227,11 @@ function speak(text) {
   });
 }
 
+// 音声リストの初期ロード対応
+if (typeof speechSynthesis !== 'undefined') {
+  speechSynthesis.onvoiceschanged = () => { speechSynthesis.getVoices(); };
+}
+
 // インタビュー開始
 startBtn.addEventListener('click', () => {
   document.getElementById('setup').classList.add('hidden');
@@ -223,7 +250,6 @@ async function askQuestion() {
   document.getElementById('questionText').textContent = q;
   document.getElementById('answerInput').value = '';
   
-  // 進捗更新
   const total = QUESTION_SET.length;
   document.getElementById('progressFill').style.width = `${((qIndex + 1) / total) * 100}%`;
   document.getElementById('progressText').textContent = `質問 ${qIndex + 1} / ${total}`;
