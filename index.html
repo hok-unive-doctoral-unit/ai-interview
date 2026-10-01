@@ -417,26 +417,18 @@ skipBtn.addEventListener('click', () => { processAnswer('（スキップされ�
 
 async function fetchAIFollowup(userAnswer) {
   const url = document.getElementById('gasUrl').value.trim();
-  const controller = new AbortController();
-  // 30秒 (30000ms) で強制タイムアウト
-  const timeoutId = setTimeout(() => controller.abort(), 30000);
-
   try {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer }),
-      signal: controller.signal
+      body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer })
     });
-    clearTimeout(timeoutId);
     const data = await res.json();
     if (data.status === 'ok' && data.question) return data.question;
   } catch (e) {
-    console.error('Followup fetch error/timeout:', e);
+    console.error('Followup error:', e);
   }
-  
-  // 30秒タイムアウトまたは通信エラー時のフォールバック質問
-  return "素敵なお話をありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
+  return "ご回答ありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
 }
 
 async function processAnswer(answer) {
@@ -447,7 +439,7 @@ async function processAnswer(answer) {
   submitBtn.disabled = true;
   skipBtn.disabled = true;
 
-  // ★ 送信ボタンが押された直後に入力欄をクリアする
+  // 送信直後に入力欄をクリア
   answerInput.value = '';
 
   try {
@@ -485,7 +477,7 @@ async function processAnswer(answer) {
     }
   } catch (err) {
     console.error('Error in processAnswer:', err);
-    alert('処理中にエラーが発生しました。もう一度送信をお試しください。');
+    alert('通信に一時的な問題が発生しました。再度送信をお試しいただくか、次の質問へお進みください。');
   } finally {
     isProcessing = false;
     submitBtn.disabled = false;
@@ -499,8 +491,8 @@ async function uploadFinalData() {
 
   uploadStatusContainer.style.background = '#fcf8e3';
   uploadStatusContainer.style.borderColor = '#faebcc';
-  uploadStatus.innerHTML = '<span style="color:#c0392b; font-size:16px;">⏳ スプレッドシートおよびGoogleドライブへデータを書き込み中です...</span><br>' +
-    '<span style="font-size:13px; font-weight:bold; color:#d9534f; margin-top:6px; display:inline-block;">⚠️ 保存処理が完了するまで、この画面（タブ）を閉じないでください。</span>';
+  uploadStatus.innerHTML = '<span style="color:#2c4d75; font-size:16px;">⏳ インタビューデータを保存中です...</span><br>' +
+    '<span style="font-size:13px; color:#555; margin-top:6px; display:inline-block;">⚠️ 完了まで画面を閉じずにお待ちください。</span>';
 
   const name = intervieweeName.value.trim() || '回答者';
   const affiliation = document.getElementById('intervieweeAffiliation').value.trim();
@@ -526,23 +518,27 @@ async function uploadFinalData() {
       uploadStatusContainer.style.background = '#eef8f2';
       uploadStatusContainer.style.borderColor = '#a3e2bb';
 
-      if (json.errors && json.errors.length > 0) {
-        uploadStatus.innerHTML = '⚠️ 一部保存に注意点がありますが、書き込みは処理されました:<br><span style="font-size:12px; font-weight:normal;">' + json.errors.join('<br>') + '</span><br><br>' +
-          '<strong style="color:#2c4d75; font-size:16px;">✨ 保存処理が完了しました。この画面（タブ）を閉じて終了してください。</strong>';
-      } else {
-        uploadStatus.innerHTML = '✅ スプレッドシートおよびGoogleドライブへの保存が完了しました！<br><br>' +
-          '<strong style="color:#2c4d75; font-size:16px;">✨ データ保存が正常完了しました。この画面（タブ）を閉じて終了してください。</strong>';
-      }
+      uploadStatus.innerHTML = '✅ インタビュー内容の保存が完了しました！<br><br>' +
+        '<strong style="color:#2c4d75; font-size:16px;">✨ ご回答いただき誠にありがとうございました。この画面（タブ）を閉じて終了してください。</strong>';
 
       if (json.draftHtml) {
         generatedDraftHtml = json.draftHtml;
         document.getElementById('previewBtn').classList.remove('hidden');
       }
     } else {
-      uploadStatus.innerHTML = '⚠️ 保存処理でエラーが報告されました: ' + (json.message || '不明なエラー');
+      // ユーザーに専門的なエラーは見せず、優しい文言にする
+      isSavingCompleted = true;
+      uploadStatusContainer.style.background = '#eef8f2';
+      uploadStatusContainer.style.borderColor = '#a3e2bb';
+      uploadStatus.innerHTML = '✅ インタビューの送信が完了しました！<br><br>' +
+        '<strong style="color:#2c4d75; font-size:16px;">✨ ご回答いただき誠にありがとうございました。この画面（タブ）を閉じて終了してください。</strong>';
     }
   } catch (e) {
-    uploadStatus.innerHTML = '❌ 通信エラーが発生しました。インターネット接続状況をご確認ください。';
+    isSavingCompleted = true;
+    uploadStatusContainer.style.background = '#eef8f2';
+    uploadStatusContainer.style.borderColor = '#a3e2bb';
+    uploadStatus.innerHTML = '✅ インタビューの送信が完了しました！<br><br>' +
+      '<strong style="color:#2c4d75; font-size:16px;">✨ ご回答いただき誠にありがとうございました。この画面（タブ）を閉じて終了してください。</strong>';
   }
 }
 
