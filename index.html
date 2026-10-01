@@ -415,8 +415,10 @@ async function processAnswer(answer) {
 
   transcript.push({ speaker: '回答者', text: answer });
 
-  // 深掘り質問判定（回答が5文字以上かつスキップでない場合）
-  if (followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
+  // 深掘り質問判定
+  // ※ 条件追加: qIndex < QUESTION_SET.length - 1 (最後の質問のときは深掘りを行わない)
+  const isLastQuestion = (qIndex === QUESTION_SET.length - 1);
+  if (!isLastQuestion && followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
     followupCount++;
     avatarStatus.textContent = 'AIが回答を分析して深掘り質問を作成中...';
 
@@ -479,6 +481,7 @@ async function uploadFinalData() {
     if (json.status === 'ok') {
       uploadStatus.textContent = '✅ スプレッドシートおよびGoogleドライブへの保存が完了しました！';
       if (json.draftHtml) {
+        generatedDraftHtml = json.draftHtml;
         document.getElementById('previewBtn').classList.remove('hidden');
       }
     } else {
