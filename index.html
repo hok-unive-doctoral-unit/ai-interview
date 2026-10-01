@@ -214,7 +214,6 @@
       <h2 style="color: var(--primary);">🎉 インタビューが終了しました</h2>
       <p style="font-size: 14px; color: #555;">ご協力ありがとうございました。</p>
       
-      <!-- 最初から「保存中」の状態を表示しておくことで空枠化を解消 -->
       <div id="uploadStatusContainer" class="status-card">
         <p id="uploadStatus" style="font-size: 14px; color: var(--primary); margin: 0; font-weight: bold;">
           <span style="color:#2c4d75; font-size:16px;">⏳ インタビューデータを保存中です...</span><br>
@@ -418,14 +417,13 @@ async function askCurrent() {
 submitBtn.addEventListener('click', () => { processAnswer(answerInput.value.trim()); });
 skipBtn.addEventListener('click', () => { processAnswer('（スキップされました）'); });
 
-// ★ 深掘り質問取得関数（タイムアウト長めの45秒 + 失敗時自動1回再試行付き）
 async function fetchAIFollowup(userAnswer, retries = 1) {
   const url = document.getElementById('gasUrl').value.trim();
   
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000); // タイムアウトを45秒に設定
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       const res = await fetch(url, {
         method: 'POST',
@@ -442,7 +440,7 @@ async function fetchAIFollowup(userAnswer, retries = 1) {
     } catch (e) {
       console.warn(`Attempt ${attempt + 1} failed for followup:`, e);
       if (attempt === retries) break;
-      await new Promise(r => setTimeout(r, 1000)); // 1秒待って再試行
+      await new Promise(r => setTimeout(r, 1000));
     }
   }
   
@@ -487,10 +485,15 @@ async function processAnswer(answer) {
     if (qIndex < QUESTION_SET.length) {
       askCurrent();
     } else {
+      // インタビュー終了画面の切り替え
       interviewSection.classList.add('hidden');
       finishSection.classList.remove('hidden');
-      await speak('お疲れ様でした。すべての質問が終了しました。ご協力ありがとうございました。');
+      
+      // バックグラウンドでデータ保存を開始
       uploadFinalData();
+
+      // ★ インタビュアーからの丁寧な終了アナウンス（読み上げと口パク）
+      await speak('ご回答ありがとうございました。インタビューは以上となります。ただいまデータを保存しておりますので、完了までそのまま少々お待ちください。');
     }
   } catch (err) {
     console.error('Error in processAnswer:', err);
