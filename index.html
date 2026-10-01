@@ -136,8 +136,8 @@
   .form-group input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
   
   .status-card {
-    background: #eef8f2;
-    border: 1px solid #a3e2bb;
+    background: #fcf8e3;
+    border: 1px solid #faebcc;
     border-radius: 8px;
     padding: 16px;
     margin: 20px 0;
@@ -214,8 +214,12 @@
       <h2 style="color: var(--primary);">🎉 インタビューが終了しました</h2>
       <p style="font-size: 14px; color: #555;">ご協力ありがとうございました。</p>
       
+      <!-- 最初から「保存中」の状態を表示しておくことで空枠化を解消 -->
       <div id="uploadStatusContainer" class="status-card">
-        <p id="uploadStatus" style="font-size: 14px; color: var(--primary); margin: 0; font-weight: bold;"></p>
+        <p id="uploadStatus" style="font-size: 14px; color: var(--primary); margin: 0; font-weight: bold;">
+          <span style="color:#2c4d75; font-size:16px;">⏳ インタビューデータを保存中です...</span><br>
+          <span style="font-size:13px; color:#555; margin-top:6px; display:inline-block;">⚠️ 完了まで画面を閉じずにお待ちください。</span>
+        </p>
       </div>
 
       <div class="button-group" style="flex-direction: column; gap: 10px;">
@@ -270,7 +274,6 @@ function updateStartStatus() {
   startBtn.disabled = !(consent.checked && intervieweeName.value.trim().length > 0);
 }
 
-// 誤って画面を閉じるのを防ぐ保護機能
 window.addEventListener('beforeunload', (e) => {
   if (qIndex > 0 && !isSavingCompleted) {
     e.preventDefault();
@@ -415,19 +418,34 @@ async function askCurrent() {
 submitBtn.addEventListener('click', () => { processAnswer(answerInput.value.trim()); });
 skipBtn.addEventListener('click', () => { processAnswer('（スキップされました）'); });
 
-async function fetchAIFollowup(userAnswer) {
+// ★ 深掘り質問取得関数（タイムアウト長めの45秒 + 失敗時自動1回再試行付き）
+async function fetchAIFollowup(userAnswer, retries = 1) {
   const url = document.getElementById('gasUrl').value.trim();
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer })
-    });
-    const data = await res.json();
-    if (data.status === 'ok' && data.question) return data.question;
-  } catch (e) {
-    console.error('Followup error:', e);
+  
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // タイムアウトを45秒に設定
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      const data = await res.json();
+      if (data.status === 'ok' && data.question) {
+        return data.question;
+      }
+    } catch (e) {
+      console.warn(`Attempt ${attempt + 1} failed for followup:`, e);
+      if (attempt === retries) break;
+      await new Promise(r => setTimeout(r, 1000)); // 1秒待って再試行
+    }
   }
+  
   return "ご回答ありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
 }
 
@@ -439,7 +457,6 @@ async function processAnswer(answer) {
   submitBtn.disabled = true;
   skipBtn.disabled = true;
 
-  // 送信直後に入力欄をクリア
   answerInput.value = '';
 
   try {
@@ -489,11 +506,6 @@ async function uploadFinalData() {
   const uploadStatusContainer = document.getElementById('uploadStatusContainer');
   const uploadStatus = document.getElementById('uploadStatus');
 
-  uploadStatusContainer.style.background = '#fcf8e3';
-  uploadStatusContainer.style.borderColor = '#faebcc';
-  uploadStatus.innerHTML = '<span style="color:#2c4d75; font-size:16px;">⏳ インタビューデータを保存中です...</span><br>' +
-    '<span style="font-size:13px; color:#555; margin-top:6px; display:inline-block;">⚠️ 完了まで画面を閉じずにお待ちください。</span>';
-
   const name = intervieweeName.value.trim() || '回答者';
   const affiliation = document.getElementById('intervieweeAffiliation').value.trim();
   const url = document.getElementById('gasUrl').value.trim();
@@ -513,11 +525,11 @@ async function uploadFinalData() {
     });
     const json = await res.json();
 
-    if (json.status === 'ok') {
-      isSavingCompleted = true;
-      uploadStatusContainer.style.background = '#eef8f2';
-      uploadStatusContainer.style.borderColor = '#a3e2bb';
+    isSavingCompleted = true;
+    uploadStatusContainer.style.background = '#eef8f2';
+    uploadStatusContainer.style.borderColor = '#a3e2bb';
 
+    if (json.status === 'ok') {
       uploadStatus.innerHTML = '✅ インタビュー内容の保存が完了しました！<br><br>' +
         '<strong style="color:#2c4d75; font-size:16px;">✨ ご回答いただき誠にありがとうございました。この画面（タブ）を閉じて終了してください。</strong>';
 
@@ -526,10 +538,6 @@ async function uploadFinalData() {
         document.getElementById('previewBtn').classList.remove('hidden');
       }
     } else {
-      // ユーザーに専門的なエラーは見せず、優しい文言にする
-      isSavingCompleted = true;
-      uploadStatusContainer.style.background = '#eef8f2';
-      uploadStatusContainer.style.borderColor = '#a3e2bb';
       uploadStatus.innerHTML = '✅ インタビューの送信が完了しました！<br><br>' +
         '<strong style="color:#2c4d75; font-size:16px;">✨ ご回答いただき誠にありがとうございました。この画面（タブ）を閉じて終了してください。</strong>';
     }
