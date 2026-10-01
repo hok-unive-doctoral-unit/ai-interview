@@ -260,22 +260,42 @@ function updateStartStatus() {
   startBtn.disabled = !(consent.checked && intervieweeName.value.trim().length > 0);
 }
 
-// 口パク制御アニメーション（口開けと口閉じを交互に切替）
+// 口パク制御アニメーション（3コマ滑らか移動 ＋ ランダム間隔）
 function startLipSync() {
   stopLipSync();
-  let isOpen = false;
-  lipSyncInterval = setInterval(() => {
-    isOpen = !isOpen;
-    avatarImg.src = isOpen ? 'avatar_open.jpg' : 'avatar_close.jpg';
-  }, 150); // 150ミリ秒周期でパクパク
+  
+  // 表示するコマの順番（閉じ → 半開き → 開き → 半開き）
+  const sequence = [
+    'avatar_close.jpg',
+    'avatar_half.jpg',
+    'avatar_open.jpg',
+    'avatar_half.jpg'
+  ];
+  let frameIndex = 0;
+
+  function loop() {
+    // 現在のフレーム画像を設定
+    avatarImg.src = sequence[frameIndex];
+
+    // 次のフレームへ進める（ループ）
+    frameIndex = (frameIndex + 1) % sequence.length;
+
+    // フレームごとに切り替え時間を少し変えて人間の発話リズムに近づける
+    // (80ms〜160msのランダム指定で滑らかかつリアルに)
+    const randomDelay = Math.floor(Math.random() * 80) + 80;
+    
+    lipSyncInterval = setTimeout(loop, randomDelay);
+  }
+
+  loop();
 }
 
 function stopLipSync() {
   if (lipSyncInterval) {
-    clearInterval(lipSyncInterval);
+    clearTimeout(lipSyncInterval);
     lipSyncInterval = null;
   }
-  avatarImg.src = 'avatar_close.jpg'; // 口を閉じた状態に戻す
+  avatarImg.src = 'avatar_close.jpg'; // 話し終わりに口をしっかり閉じる
 }
 
 // 音声読み上げ（口パクアニメーション連携付き）
