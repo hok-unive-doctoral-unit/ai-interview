@@ -236,6 +236,7 @@ let sessionId = '';
 let currentQuestionText = '';
 let isProcessing = false;
 let generatedDraftHtml = '';
+let lipSyncInterval = null; // 口パク用タイマー
 
 const setupSection = document.getElementById('setupSection');
 const interviewSection = document.getElementById('interviewSection');
@@ -259,16 +260,25 @@ function updateStartStatus() {
   startBtn.disabled = !(consent.checked && intervieweeName.value.trim().length > 0);
 }
 
-// アバター画像切り替え
-function setAvatarState(speaking) {
-  if (speaking) {
-    avatarImg.src = 'avatar_open.jpg';
-  } else {
-    avatarImg.src = 'avatar_close.jpg';
-  }
+// 口パク制御アニメーション（口開けと口閉じを交互に切替）
+function startLipSync() {
+  stopLipSync();
+  let isOpen = false;
+  lipSyncInterval = setInterval(() => {
+    isOpen = !isOpen;
+    avatarImg.src = isOpen ? 'avatar_open.jpg' : 'avatar_close.jpg';
+  }, 150); // 150ミリ秒周期でパクパク
 }
 
-// 音声読み上げ（アバター切り替え機能＆安全タイムアウト付き）
+function stopLipSync() {
+  if (lipSyncInterval) {
+    clearInterval(lipSyncInterval);
+    lipSyncInterval = null;
+  }
+  avatarImg.src = 'avatar_close.jpg'; // 口を閉じた状態に戻す
+}
+
+// 音声読み上げ（口パクアニメーション連携付き）
 function speak(text) {
   return new Promise(resolve => {
     if (!document.getElementById('enableSpeech').checked || !('speechSynthesis' in window)) {
@@ -284,18 +294,18 @@ function speak(text) {
     const endHandler = () => {
       if (!hasEnded) {
         hasEnded = true;
-        setAvatarState(false);
+        stopLipSync();
         resolve();
       }
     };
 
     u.onstart = () => {
-      setAvatarState(true);
+      startLipSync();
     };
     u.onend = endHandler;
     u.onerror = endHandler;
 
-    // 音声APIが途中で引っかかった場合の安全解除（最大8秒）
+    // 音声APIが途中で止まった場合の安全解除（最大8秒）
     setTimeout(endHandler, 8000);
 
     speechSynthesis.speak(u);
@@ -469,7 +479,6 @@ async function uploadFinalData() {
     if (json.status === 'ok') {
       uploadStatus.textContent = '✅ スプレッドシートおよびGoogleドライブへの保存が完了しました！';
       if (json.draftHtml) {
-        generatedDraftHtml = json.draftHtml;
         document.getElementById('previewBtn').classList.remove('hidden');
       }
     } else {
