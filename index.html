@@ -417,18 +417,26 @@ skipBtn.addEventListener('click', () => { processAnswer('（スキップされ�
 
 async function fetchAIFollowup(userAnswer) {
   const url = document.getElementById('gasUrl').value.trim();
+  const controller = new AbortController();
+  // 30秒 (30000ms) で強制タイムアウト
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
   try {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer })
+      body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
     const data = await res.json();
     if (data.status === 'ok' && data.question) return data.question;
   } catch (e) {
-    console.error('Followup fetch error:', e);
+    console.error('Followup fetch error/timeout:', e);
   }
-  return "素敵なお話をありがとうございます！その点について、もう少し詳しく教えていただけますか？";
+  
+  // 30秒タイムアウトまたは通信エラー時のフォールバック質問
+  return "素敵なお話をありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
 }
 
 async function processAnswer(answer) {
@@ -438,6 +446,9 @@ async function processAnswer(answer) {
   isProcessing = true;
   submitBtn.disabled = true;
   skipBtn.disabled = true;
+
+  // ★ 送信ボタンが押された直後に入力欄をクリアする
+  answerInput.value = '';
 
   try {
     if (recognizing && recognition) recognition.stop();
@@ -458,7 +469,6 @@ async function processAnswer(answer) {
       avatarStatus.textContent = 'AIがお話し中...';
       await speak(followupQ);
       avatarStatus.textContent = '回答をお待ちしています';
-      answerInput.value = '';
       return;
     }
 
