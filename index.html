@@ -1,426 +1,14 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>博士キャリア支援 AIインタビュー</title>
-<style>
-  :root {
-    --primary: #2c4d75;
-    --primary-hover: #1e3654;
-    --accent-red: #e74c3c;
-    --bg-color: #f0f4f8;
-    --card-bg: #ffffff;
-  }
+// ... （前略: 変数定義などは変更なし） ...
 
-  body {
-    font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-    background-color: var(--bg-color);
-    margin: 0;
-    padding: 20px 10px;
-    color: #333;
-    display: flex;
-    justify-content: center;
-  }
+let isSavingCompleted = false;
 
-  .container {
-    width: 100%;
-    max-width: 720px;
-    background: var(--card-bg);
-    border-radius: 16px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    overflow: hidden;
-  }
-
-  .header {
-    background: var(--primary);
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-  }
-  .header h1 { margin: 0; font-size: 20px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .header p { margin: 6px 0 0 0; font-size: 13px; opacity: 0.8; }
-
-  .content { padding: 24px; }
-
-  /* アバター表示エリア */
-  .avatar-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  .avatar-wrapper {
-    width: 220px;
-    height: 220px;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-    background: #eef5fc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid var(--primary);
-  }
-  .avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .avatar-status {
-    margin-top: 10px;
-    font-size: 14px;
-    color: var(--primary);
-    font-weight: 600;
-  }
-
-  .question-box {
-    background: #eef5fc;
-    border-left: 5px solid var(--primary);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 20px;
-  }
-  .question-title { font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 4px; }
-  .question-text { font-size: 16px; font-weight: bold; color: #1a252f; line-height: 1.5; }
-
-  textarea {
-    width: 100%;
-    height: 110px;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 14px;
-    box-sizing: border-box;
-    resize: vertical;
-    font-family: inherit;
-  }
-
-  .button-group {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 18px;
-    flex-wrap: wrap;
-  }
-  button {
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-width: 120px;
-  }
-  .btn-mic { background: var(--accent-red); color: #fff; }
-  .btn-mic:hover { background: #c0392b; }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover { background: var(--primary-hover); }
-  .btn-skip { background: #7f8c8d; color: #fff; }
-  .btn-skip:hover { background: #687576; }
-  button:disabled { background: #bdc3c7 !important; cursor: not-allowed; opacity: 0.7; }
-
-  .progress-container { margin-top: 24px; text-align: center; }
-  .progress-bar { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
-  .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
-  .progress-text { font-size: 12px; color: #7f8c8d; }
-
-  .hidden { display: none !important; }
-  
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
-  .form-group input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-</style>
-</head>
-<body>
-
-<div class="container">
-  <div class="header">
-    <h1>🎤 博士キャリア支援 AIインタビュー</h1>
-    <p>リアルタイム音声対話 + AI分析</p>
-  </div>
-
-  <div class="content">
-
-    <!-- 1. 初期設定画面 -->
-    <div id="setupSection">
-      <div class="form-group">
-        <label>お名前:</label>
-        <input type="text" id="intervieweeName" placeholder="例: 山田 太郎">
-      </div>
-      <div class="form-group">
-        <label>ご所属 (大学・機関名等):</label>
-        <input type="text" id="intervieweeAffiliation" placeholder="例: ○○大学 大学院">
-      </div>
-      <div class="form-group" style="margin-top: 16px;">
-        <label style="font-weight: normal; font-size: 13px;">
-          <input type="checkbox" id="enableSpeech" checked> AIの質問を音声で読み上げる
-        </label>
-        <label style="font-weight: normal; font-size: 13px; margin-top: 6px;">
-          <input type="checkbox" id="consent"> 録音・文字起こし・データ保存に同意します
-        </label>
-      </div>
-
-      <!-- GAS Web App URL -->
-      <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbyZLmzYt2qUVojXi6DGvqcaQflzjDuiB9KUXbdD4AckVZzj1XCRQwtnIgKDSwuTgPj8bQ/exec">
-
-      <div style="text-align: center; margin-top: 24px;">
-        <button id="startBtn" class="btn-primary" disabled style="width: 100%; padding: 14px;">インタビューを開始する</button>
-      </div>
-    </div>
-
-    <!-- 2. インタビュー対話画面 -->
-    <div id="interviewSection" class="hidden">
-      <div class="avatar-container">
-        <div class="avatar-wrapper">
-          <img src="avatar_close.jpg" alt="AI Interviewer" class="avatar-img" id="avatarImg">
-        </div>
-        <div class="avatar-status" id="avatarStatus">回答をお待ちしています</div>
-      </div>
-
-      <div class="question-box">
-        <div class="question-title">質問</div>
-        <div class="question-text" id="questionText">読み込み中...</div>
-      </div>
-
-      <textarea id="answerInput" placeholder="ここに回答を入力するか、マイクボタンを押してお話しください..."></textarea>
-
-      <div class="button-group">
-        <button id="micToggleBtn" class="btn-mic">🎙️ 話し始める</button>
-        <button id="submitBtn" class="btn-primary">✉️ 送信する</button>
-        <button id="skipBtn" class="btn-skip">⏩ スキップ</button>
-      </div>
-
-      <div class="progress-container">
-        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-        <div class="progress-text" id="progressText">質問 1 / 6</div>
-      </div>
-    </div>
-
-    <!-- 3. インタビュー終了画面 -->
-    <div id="finishSection" class="hidden" style="text-align: center;">
-      <h2 style="color: var(--primary);">🎉 インタビューが終了しました</h2>
-      <p style="font-size: 14px; color: #555;">ご協力ありがとうございました。<br>データはGoogleドライブおよびスプレッドシートへ自動送信されています。</p>
-      
-      <p id="uploadStatus" style="font-size: 13px; color: var(--primary); font-weight: bold; margin: 20px 0;"></p>
-
-      <div class="button-group" style="flex-direction: column; gap: 10px;">
-        <button id="previewBtn" class="btn-primary hidden" style="justify-content: center;">🌐 Web掲載イメージを見る</button>
-        <button id="downloadTranscriptBtn" class="btn-skip" style="justify-content: center;">📝 文字起こし全文をダウンロード</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<script>
-const QUESTION_SET = [
-  '現在のご所属と、どのような研究・お仕事をされているか教えてください。',
-  'これまでの主なキャリアのご経歴について教えてください。',
-  '博士支援に関わるようになったきっかけやご動機は何ですか？',
-  '現在のお仕事で特にやりがいを感じる瞬間はどんなときですか？',
-  'これまでで苦労されたことや、それをどう乗り越えたかを教えてください。',
-  'これからキャリア支援を目指す方や後輩の博士人材へメッセージをお願いします。'
-];
-
-let qIndex = 0;
-let followupCount = 0;
-const MAX_FOLLOWUP = 1;
-let transcript = [];
-let sessionId = '';
-let currentQuestionText = '';
-let isProcessing = false;
-let generatedDraftHtml = '';
-let lipSyncInterval = null; // 口パク用タイマー
-
-const setupSection = document.getElementById('setupSection');
-const interviewSection = document.getElementById('interviewSection');
-const finishSection = document.getElementById('finishSection');
-const consent = document.getElementById('consent');
-const intervieweeName = document.getElementById('intervieweeName');
-const startBtn = document.getElementById('startBtn');
-const questionText = document.getElementById('questionText');
-const answerInput = document.getElementById('answerInput');
-const avatarStatus = document.getElementById('avatarStatus');
-const avatarImg = document.getElementById('avatarImg');
-const micToggleBtn = document.getElementById('micToggleBtn');
-const submitBtn = document.getElementById('submitBtn');
-const skipBtn = document.getElementById('skipBtn');
-const progressFill = document.getElementById('progressFill');
-const progressText = document.getElementById('progressText');
-
-consent.addEventListener('change', updateStartStatus);
-intervieweeName.addEventListener('input', updateStartStatus);
-function updateStartStatus() {
-  startBtn.disabled = !(consent.checked && intervieweeName.value.trim().length > 0);
-}
-
-// 口パク制御アニメーション（3コマ滑らか移動 ＋ ランダム間隔）
-function startLipSync() {
-  stopLipSync();
-  
-  // 表示するコマの順番（閉じ → 半開き → 開き → 半開き）
-  const sequence = [
-    'avatar_close.jpg',
-    'avatar_half.jpg',
-    'avatar_open.jpg',
-    'avatar_half.jpg'
-  ];
-  let frameIndex = 0;
-
-  function loop() {
-    // 現在のフレーム画像を設定
-    avatarImg.src = sequence[frameIndex];
-
-    // 次のフレームへ進める（ループ）
-    frameIndex = (frameIndex + 1) % sequence.length;
-
-    // フレームごとに切り替え時間を少し変えて人間の発話リズムに近づける
-    // (80ms〜160msのランダム指定で滑らかかつリアルに)
-    const randomDelay = Math.floor(Math.random() * 80) + 80;
-    
-    lipSyncInterval = setTimeout(loop, randomDelay);
-  }
-
-  loop();
-}
-
-function stopLipSync() {
-  if (lipSyncInterval) {
-    clearTimeout(lipSyncInterval);
-    lipSyncInterval = null;
-  }
-  avatarImg.src = 'avatar_close.jpg'; // 話し終わりに口をしっかり閉じる
-}
-
-// 音声読み上げ（口パクアニメーション連携付き）
-function speak(text) {
-  return new Promise(resolve => {
-    if (!document.getElementById('enableSpeech').checked || !('speechSynthesis' in window)) {
-      resolve();
-      return;
-    }
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ja-JP';
-    u.rate = 1.0;
-
-    let hasEnded = false;
-    const endHandler = () => {
-      if (!hasEnded) {
-        hasEnded = true;
-        stopLipSync();
-        resolve();
-      }
-    };
-
-    u.onstart = () => {
-      startLipSync();
-    };
-    u.onend = endHandler;
-    u.onerror = endHandler;
-
-    // 音声APIが途中で止まった場合の安全解除（最大8秒）
-    setTimeout(endHandler, 8000);
-
-    speechSynthesis.speak(u);
-  });
-}
-
-// 音声認識（Web Speech API）
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let recognizing = false;
-
-function initRecognition() {
-  if (!SR) return;
-  recognition = new SR();
-  recognition.lang = 'ja-JP';
-  recognition.continuous = true;
-  recognition.interimResults = true;
-
-  recognition.onstart = () => {
-    recognizing = true;
-    micToggleBtn.textContent = '⏹ 録音停止';
-    avatarStatus.textContent = 'お話しください（音声認識中...）';
-  };
-
-  recognition.onresult = (e) => {
-    let final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      if (e.results[i].isFinal) final += e.results[i][0].transcript;
-    }
-    if (final) {
-      if (answerInput.value) answerInput.value += ' ';
-      answerInput.value += final;
-    }
-  };
-
-  recognition.onend = () => {
-    recognizing = false;
-    micToggleBtn.textContent = '🎙️ 話し始める';
-    avatarStatus.textContent = '回答をお待ちしています';
-  };
-}
-
-micToggleBtn.addEventListener('click', () => {
-  if (!SR) { alert('お使いのブラウザは音声認識に対応していません。テキスト入力をご利用ください。'); return; }
-  if (!recognition) initRecognition();
-  if (recognizing) {
-    recognition.stop();
-  } else {
-    recognition.start();
+// 誤って画面を閉じるのを防ぐ保護機能
+window.addEventListener('beforeunload', (e) => {
+  if (qIndex > 0 && !isSavingCompleted) {
+    e.preventDefault();
+    e.returnValue = '';
   }
 });
-
-startBtn.addEventListener('click', () => {
-  setupSection.classList.add('hidden');
-  interviewSection.classList.remove('hidden');
-  sessionId = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15);
-  qIndex = 0;
-  askCurrent();
-});
-
-async function askCurrent() {
-  currentQuestionText = QUESTION_SET[qIndex];
-  questionText.textContent = currentQuestionText;
-  
-  const total = QUESTION_SET.length;
-  progressText.textContent = `質問 ${qIndex + 1} / ${total}`;
-  progressFill.style.width = `${((qIndex + 1) / total) * 100}%`;
-
-  transcript.push({ speaker: 'AI', text: currentQuestionText });
-  answerInput.value = '';
-  avatarStatus.textContent = 'AIがお話し中...';
-  
-  await speak(currentQuestionText);
-  avatarStatus.textContent = '回答をお待ちしています';
-}
-
-submitBtn.addEventListener('click', () => { processAnswer(answerInput.value.trim()); });
-skipBtn.addEventListener('click', () => { processAnswer('（スキップされました）'); });
-
-// 深掘り質問の取得
-async function fetchAIFollowup(userAnswer) {
-  const url = document.getElementById('gasUrl').value.trim();
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer })
-    });
-    const data = await res.json();
-    if (data.status === 'ok' && data.question) return data.question;
-  } catch (e) {
-    console.error('Followup fetch error:', e);
-  }
-  return "素敵なお話をありがとうございます！その点について、もう少し詳しく教えていただけますか？";
-}
 
 async function processAnswer(answer) {
   if (isProcessing) return;
@@ -430,55 +18,58 @@ async function processAnswer(answer) {
   submitBtn.disabled = true;
   skipBtn.disabled = true;
 
-  if (recognizing && recognition) recognition.stop();
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  try {
+    if (recognizing && recognition) recognition.stop();
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
 
-  transcript.push({ speaker: '回答者', text: answer });
+    transcript.push({ speaker: '回答者', text: answer });
 
-  // 深掘り質問判定
-  // ※ 条件追加: qIndex < QUESTION_SET.length - 1 (最後の質問のときは深掘りを行わない)
-  const isLastQuestion = (qIndex === QUESTION_SET.length - 1);
-  if (!isLastQuestion && followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
-    followupCount++;
-    avatarStatus.textContent = 'AIが回答を分析して深掘り質問を作成中...';
+    const isLastQuestion = (qIndex === QUESTION_SET.length - 1);
+    if (!isLastQuestion && followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
+      followupCount++;
+      avatarStatus.textContent = 'AIが回答を分析して深掘り質問を作成中...';
 
-    const followupQ = await fetchAIFollowup(answer);
-    currentQuestionText = followupQ;
-    questionText.textContent = followupQ;
-    transcript.push({ speaker: 'AI', text: followupQ });
-    
-    avatarStatus.textContent = 'AIがお話し中...';
-    await speak(followupQ);
-    avatarStatus.textContent = '回答をお待ちしています';
-    answerInput.value = '';
+      const followupQ = await fetchAIFollowup(answer);
+      currentQuestionText = followupQ;
+      questionText.textContent = followupQ;
+      transcript.push({ speaker: 'AI', text: followupQ });
+      
+      avatarStatus.textContent = 'AIがお話し中...';
+      await speak(followupQ);
+      avatarStatus.textContent = '回答をお待ちしています';
+      answerInput.value = '';
+      return;
+    }
 
+    followupCount = 0;
+    qIndex++;
+
+    if (qIndex < QUESTION_SET.length) {
+      askCurrent();
+    } else {
+      interviewSection.classList.add('hidden');
+      finishSection.classList.remove('hidden');
+      await speak('お疲れ様でした。すべての質問が終了しました。ご協力ありがとうございました。');
+      uploadFinalData();
+    }
+  } catch (err) {
+    console.error('An error occurred during processAnswer:', err);
+    alert('エラーが発生しました。もう一度送信をお試しください。');
+  } finally {
     isProcessing = false;
     submitBtn.disabled = false;
     skipBtn.disabled = false;
-    return;
-  }
-
-  // 次の質問へ進む
-  followupCount = 0;
-  qIndex++;
-
-  if (qIndex < QUESTION_SET.length) {
-    isProcessing = false;
-    submitBtn.disabled = false;
-    skipBtn.disabled = false;
-    askCurrent();
-  } else {
-    // 終了処理
-    interviewSection.classList.add('hidden');
-    finishSection.classList.remove('hidden');
-    await speak('お疲れ様でした。すべての質問が終了しました。ご協力ありがとうございました。');
-    uploadFinalData();
   }
 }
 
 async function uploadFinalData() {
+  const uploadStatusContainer = document.getElementById('uploadStatusContainer');
   const uploadStatus = document.getElementById('uploadStatus');
-  uploadStatus.textContent = 'スプレッドシートおよびGoogleドライブへ保存中...';
+
+  uploadStatusContainer.style.background = '#fcf8e3';
+  uploadStatusContainer.style.borderColor = '#faebcc';
+  uploadStatus.innerHTML = '<span style="color:#c0392b; font-size:16px;">⏳ スプレッドシートおよびGoogleドライブへデータを書き込み中です...</span><br>' +
+    '<span style="font-size:13px; font-weight:bold; color:#d9534f; margin-top:6px; display:inline-block;">⚠️ 保存処理が完了するまで、この画面（タブ）を閉じないでください。</span>';
 
   const name = intervieweeName.value.trim() || '回答者';
   const affiliation = document.getElementById('intervieweeAffiliation').value.trim();
@@ -498,35 +89,28 @@ async function uploadFinalData() {
       body: JSON.stringify(payload)
     });
     const json = await res.json();
+
     if (json.status === 'ok') {
-      uploadStatus.textContent = '✅ スプレッドシートおよびGoogleドライブへの保存が完了しました！';
+      isSavingCompleted = true; // 保存完了フラグオン
+      uploadStatusContainer.style.background = '#eef8f2';
+      uploadStatusContainer.style.borderColor = '#a3e2bb';
+
+      if (json.errors && json.errors.length > 0) {
+        uploadStatus.innerHTML = '⚠️ 一部保存に注意点がありますが、書き込みは処理されました:<br><span style="font-size:12px; font-weight:normal;">' + json.errors.join('<br>') + '</span><br><br>' +
+          '<strong style="color:#2c4d75; font-size:16px;">✨ 保存処理が完了しました。この画面（タブ）を閉じて終了してください。</strong>';
+      } else {
+        uploadStatus.innerHTML = '✅ スプレッドシートおよびGoogleドライブへの保存が完了しました！<br><br>' +
+          '<strong style="color:#2c4d75; font-size:16px;">✨ データ保存が正常完了しました。この画面（タブ）を閉じて終了してください。</strong>';
+      }
+
       if (json.draftHtml) {
         generatedDraftHtml = json.draftHtml;
         document.getElementById('previewBtn').classList.remove('hidden');
       }
     } else {
-      uploadStatus.textContent = '⚠️ 保存中にエラーが発生しました: ' + (json.message || '不明なエラー');
+      uploadStatus.innerHTML = '⚠️ 保存処理でエラーが報告されました: ' + (json.message || '不明なエラー');
     }
   } catch (e) {
-    uploadStatus.textContent = '❌ 通信エラーが発生しました。';
+    uploadStatus.innerHTML = '❌ 通信エラーが発生しました。インターネット接続状況をご確認ください。';
   }
 }
-
-document.getElementById('downloadTranscriptBtn').addEventListener('click', () => {
-  const text = transcript.map(t => `【${t.speaker}】${t.text}`).join('\n\n');
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'インタビュー文字起こし.txt';
-  a.click();
-});
-
-document.getElementById('previewBtn').addEventListener('click', () => {
-  if (!generatedDraftHtml) return;
-  const blob = new Blob([generatedDraftHtml], { type: 'text/html;charset=utf-8' });
-  window.open(URL.createObjectURL(blob), '_blank');
-});
-</script>
-
-</body>
-</html>
