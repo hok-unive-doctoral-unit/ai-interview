@@ -534,18 +534,18 @@ async function fetchAIFollowup(userAnswer, retries = 1) {
   
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      // タイムアウトを 60000ms（60秒）に延長
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000);
 
+      // GASへのデータ送信形式をURLSearchParamsに変更
+      const params = new URLSearchParams();
+      params.append('mode', 'followup');
+      params.append('currentQuestion', currentQuestionText);
+      params.append('userAnswer', userAnswer);
+
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ 
-          mode: 'followup', 
-          currentQuestion: currentQuestionText, 
-          userAnswer: userAnswer 
-        }),
+        body: params,
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -557,12 +557,10 @@ async function fetchAIFollowup(userAnswer, retries = 1) {
     } catch (e) {
       console.warn(`Followup attempt ${attempt + 1} failed:`, e);
       if (attempt === retries) break;
-      // 1秒待って再試行
       await new Promise(r => setTimeout(r, 1000));
     }
   }
   
-  // 60秒×2回試行してもダメだった場合のみ固定文を返す
   return "ご回答ありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
 }
 
