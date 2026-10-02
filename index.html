@@ -617,7 +617,8 @@ async function uploadFinalData() {
     });
     const json = await res.json();
 
-    if (json.status === 'ok' && json.draftHtml) {
+    // ★ draftHtml が存在していれば、レスポンス状態に関わらずプレビューボタンを表示する
+    if (json && json.draftHtml) {
       generatedDraftHtml = json.draftHtml;
       document.getElementById('previewBtn').classList.remove('hidden');
     }
