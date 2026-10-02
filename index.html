@@ -507,32 +507,41 @@ backBtn.addEventListener('click', () => {
   askCurrent();
 });
 
-// AI深掘り質問の非同期取得
+// 深掘り質問取得関数（タイムアウト60秒＋自動再試行付き）
 async function fetchAIFollowup(userAnswer, retries = 1) {
   const url = document.getElementById('gasUrl').value.trim();
   
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
+      // タイムアウトを 60000ms（60秒）に延長
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000);
+      const timeoutId = setTimeout(() => controller.abort(), 60000);
 
       const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ mode: 'followup', currentQuestion: currentQuestionText, userAnswer: userAnswer }),
+        body: JSON.stringify({ 
+          mode: 'followup', 
+          currentQuestion: currentQuestionText, 
+          userAnswer: userAnswer 
+        }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
 
       const data = await res.json();
-      if (data.status === 'ok' && data.question) return data.question;
+      if (data.status === 'ok' && data.question) {
+        return data.question;
+      }
     } catch (e) {
-      console.warn(`Attempt ${attempt + 1} failed for followup:`, e);
+      console.warn(`Followup attempt ${attempt + 1} failed:`, e);
       if (attempt === retries) break;
+      // 1秒待って再試行
       await new Promise(r => setTimeout(r, 1000));
     }
   }
   
+  // 60秒×2回試行してもダメだった場合のみ固定文を返す
   return "ご回答ありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
 }
 
@@ -593,10 +602,16 @@ async function processAnswer(answer) {
   }
 }
 
-// データ保存アップロード
+// データ保存アップロード（6分タイムアウト制御・安心メッセージ付き）
 async function uploadFinalData() {
   const uploadStatusContainer = document.getElementById('uploadStatusContainer');
   const uploadStatus = document.getElementById('uploadStatus');
+
+  // 事前案内メッセージ
+  uploadStatusContainer.style.background = '#fcf8e3';
+  uploadStatusContainer.style.borderColor = '#faebcc';
+  uploadStatus.innerHTML = '<span style="color:#2c4d75; font-size:16px;">⏳ インタビューデータを保存・Web原稿を生成中です...</span><br>' +
+    '<span style="font-size:13px; color:#555; margin-top:6px; display:inline-block;">⚠️ ご回答量により、完了まで<b>1〜3分程度</b>かかる場合があります。完了まで画面（タブ）を閉じずにお待ちください。</span>';
 
   const name = intervieweeName.value.trim() || '回答者';
   const affiliation = document.getElementById('intervieweeAffiliation').value.trim();
@@ -609,22 +624,29 @@ async function uploadFinalData() {
     transcript: transcript.map(t => `【${t.speaker}】${t.text}`).join('\n\n')
   };
 
+  // GASの上限に合わせて6分（360秒）のタイムアウトを設定
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 360000);
+
   try {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
+
     const json = await res.json();
 
-    // ★ draftHtml が存在していれば、レスポンス状態に関わらずプレビューボタンを表示する
     if (json && json.draftHtml) {
       generatedDraftHtml = json.draftHtml;
       document.getElementById('previewBtn').classList.remove('hidden');
     }
   } catch (e) {
-    console.error('Data upload error:', e);
+    console.error('Data upload error / timeout:', e);
   } finally {
+    clearTimeout(timeoutId);
     isSavingCompleted = true;
     uploadStatusContainer.style.background = '#eef8f2';
     uploadStatusContainer.style.borderColor = '#a3e2bb';
