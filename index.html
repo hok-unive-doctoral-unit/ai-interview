@@ -176,9 +176,8 @@
     line-height: 1.4;
   }
 
-  /* AI処理中の強調アニメーション */
   .status-loading {
-    color: var(--accent-red); /* または #2c4d75 などの青字 */
+    color: var(--accent-red);
     font-weight: bold;
     animation: pulse-status 1.5s infinite;
   }
@@ -587,9 +586,10 @@ async function processAnswer(answer) {
 
     const isLastQuestion = (qIndex === QUESTION_SET.length - 1);
     if (!isLastQuestion && followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
-    followupCount++;
-          // 赤字＋じんわり点滅するクラスを適用して案内を表示
-          avatarStatus.innerHTML = '<span class="status-loading">⏳ AIが回答を分析して深掘り質問を作成中...</span><br><span style="font-size:12px; font-weight:normal; color:#e74c3c; margin-top:4px; display:inline-block;">（最大1分程度かかる場合があります）</span>';
+      followupCount++;
+
+      // ★赤字点滅の表示設定（HTMLタグとクォーテーションの組み合わせを安全に記述）
+      avatarStatus.innerHTML = '<span class="status-loading">⏳ AIが回答を分析して深掘り質問を作成中...</span><br><span style="font-size:12px; font-weight:normal; color:#e74c3c; margin-top:4px; display:inline-block;">（最大1分程度かかる場合があります）</span>';
 
       const followupQ = await fetchAIFollowup(answer);
       currentQuestionText = followupQ;
