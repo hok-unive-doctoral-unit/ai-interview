@@ -175,6 +175,20 @@
     margin-top: 12px;
     line-height: 1.4;
   }
+
+  /* AI処理中の強調アニメーション */
+  .status-loading {
+    color: var(--accent-red); /* または #2c4d75 などの青字 */
+    font-weight: bold;
+    animation: pulse-status 1.5s infinite;
+  }
+
+  @keyframes pulse-status {
+    0% { opacity: 0.6; }
+    50% { opacity: 1.0; }
+    100% { opacity: 0.6; }
+  }
+
 </style>
 </head>
 <body>
@@ -239,7 +253,7 @@
         <div class="question-text" id="questionText">読み込み中...</div>
       </div>
 
-      <textarea id="answerInput" placeholder="ここに回答を入力するか、マイクボタンを押してお話しください... (Ctrl + Enterで送信)"></textarea>
+      <textarea id="answerInput" placeholder="ここに回答を入力するか、マイクボタンを押してお話しください... (Ctrl + Enterで進む)"></textarea>
 
       <div class="button-group">
         <button id="micToggleBtn" class="btn-mic">🎙️ 話し始める</button>
@@ -471,6 +485,14 @@ async function askCurrent() {
   progressText.textContent = `質問 ${qIndex + 1} / ${total}`;
   progressFill.style.width = `${((qIndex + 1) / total) * 100}%`;
 
+  // ★ 最終問かどうかでボタン文言を切り替え
+  const submitBtn = document.getElementById('submitBtn');
+  if (qIndex === total - 1) {
+    submitBtn.innerHTML = '✉️ 送信する';
+  } else {
+    submitBtn.innerHTML = '✉️ 次へ';
+  }
+
   backBtn.disabled = (transcript.length === 0);
   transcript.push({ speaker: 'AI', text: currentQuestionText });
   answerInput.value = '';
@@ -565,8 +587,9 @@ async function processAnswer(answer) {
 
     const isLastQuestion = (qIndex === QUESTION_SET.length - 1);
     if (!isLastQuestion && followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
-      followupCount++;
-      avatarStatus.textContent = 'AIが回答を分析して深掘り質問を作成中...';
+    followupCount++;
+          // 赤字＋じんわり点滅するクラスを適用して案内を表示
+          avatarStatus.innerHTML = '<span class="status-loading">⏳ AIが回答を分析して深掘り質問を作成中...</span><br><span style="font-size:12px; font-weight:normal; color:#e74c3c; margin-top:4px; display:inline-block;">（最大1分程度かかる場合があります）</span>';
 
       const followupQ = await fetchAIFollowup(answer);
       currentQuestionText = followupQ;
