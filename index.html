@@ -526,41 +526,45 @@ backBtn.addEventListener('click', () => {
   askCurrent();
 });
 
-// 深掘り質問取得関数（JSON通信化でGASと整合性確保）
-async function fetchAIFollowup(userAnswer, retries = 3) {
+// 深掘り質問取得関数（60秒しっかり待機する構造へ修正）
+async function fetchAIFollowup(userAnswer) {
   const url = document.getElementById('gasUrl').value.trim();
-  
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000); // 正確に60秒カウント
 
-      const payload = {
-        mode: 'followup',
-        currentQuestion: currentQuestionText,
-        userAnswer: userAnswer
-      };
+  try {
+    const payload = {
+      mode: 'followup',
+      currentQuestion: currentQuestionText,
+      userAnswer: userAnswer
+    };
 
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload),
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
 
-      const data = await res.json();
-      if (data.status === 'ok' && data.question) {
-        return data.question;
-      }
-    } catch (e) {
-      console.warn(`Followup attempt ${attempt + 1} failed:`, e);
-      if (attempt === retries) break;
-      await new Promise(r => setTimeout(r, 1000));
+    clearTimeout(timeoutId);
+
+    if (!res.ok) {
+      throw new Error(`HTTP Error: ${res.status}`);
     }
+
+    const data = await res.json();
+    if (data.status === 'ok' && data.question) {
+      return data.question; // 成功したら生成された深掘り質問を返す
+    } else {
+      throw new Error(data.message || '深掘り質問の生成に失敗しました');
+    }
+  } catch (e) {
+    clearTimeout(timeoutId);
+    console.warn('Followup Fetch Error:', e);
+
+    // タイムアウト（60秒経過）または通信失敗時のみフォールバック文を返す
+    return "ご回答ありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
   }
-  
-  return "ご回答ありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
 }
 
 // 回答送信処理
