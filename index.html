@@ -187,7 +187,6 @@
     50% { opacity: 1.0; }
     100% { opacity: 0.6; }
   }
-
 </style>
 </head>
 <body>
@@ -484,7 +483,6 @@ async function askCurrent() {
   progressText.textContent = `質問 ${qIndex + 1} / ${total}`;
   progressFill.style.width = `${((qIndex + 1) / total) * 100}%`;
 
-  // ★ 最終問かどうかでボタン文言を切り替え
   const submitBtn = document.getElementById('submitBtn');
   if (qIndex === total - 1) {
     submitBtn.innerHTML = '✉️ 送信する';
@@ -528,7 +526,7 @@ backBtn.addEventListener('click', () => {
   askCurrent();
 });
 
-// 深掘り質問取得関数（タイムアウト60秒＋自動再試行付き）
+// 深掘り質問取得関数（JSON通信化でGASと整合性確保）
 async function fetchAIFollowup(userAnswer, retries = 1) {
   const url = document.getElementById('gasUrl').value.trim();
   
@@ -537,15 +535,16 @@ async function fetchAIFollowup(userAnswer, retries = 1) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000);
 
-      // GASへのデータ送信形式をURLSearchParamsに変更
-      const params = new URLSearchParams();
-      params.append('mode', 'followup');
-      params.append('currentQuestion', currentQuestionText);
-      params.append('userAnswer', userAnswer);
+      const payload = {
+        mode: 'followup',
+        currentQuestion: currentQuestionText,
+        userAnswer: userAnswer
+      };
 
       const res = await fetch(url, {
         method: 'POST',
-        body: params,
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -586,7 +585,6 @@ async function processAnswer(answer) {
     if (!isLastQuestion && followupCount < MAX_FOLLOWUP && answer.length >= 5 && answer !== '（スキップされました）') {
       followupCount++;
 
-      // ★赤字点滅の表示設定（HTMLタグとクォーテーションの組み合わせを安全に記述）
       avatarStatus.innerHTML = '<span class="status-loading">⏳ AIが回答を分析して深掘り質問を作成中...</span><br><span style="font-size:12px; font-weight:normal; color:#e74c3c; margin-top:4px; display:inline-block;">（最大1分程度かかる場合があります）</span>';
 
       const followupQ = await fetchAIFollowup(answer);
@@ -623,12 +621,11 @@ async function processAnswer(answer) {
   }
 }
 
-// データ保存アップロード（6分タイムアウト制御・安心メッセージ付き）
+// データ保存アップロード
 async function uploadFinalData() {
   const uploadStatusContainer = document.getElementById('uploadStatusContainer');
   const uploadStatus = document.getElementById('uploadStatus');
 
-  // 事前案内メッセージ
   uploadStatusContainer.style.background = '#fcf8e3';
   uploadStatusContainer.style.borderColor = '#faebcc';
   uploadStatus.innerHTML = '<span style="color:#2c4d75; font-size:16px;">⏳ インタビューデータを保存・Web原稿を生成中です...</span><br>' +
@@ -645,7 +642,6 @@ async function uploadFinalData() {
     transcript: transcript.map(t => `【${t.speaker}】${t.text}`).join('\n\n')
   };
 
-  // GASの上限に合わせて6分（360秒）のタイムアウトを設定
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 360000);
 
@@ -677,7 +673,7 @@ async function uploadFinalData() {
   }
 }
 
-// ===== ダウンロード・プレビューイベント =====
+// ダウンロード・プレビューイベント
 document.getElementById('downloadTranscriptBtn').addEventListener('click', () => {
   const text = transcript.map(t => `【${t.speaker}】${t.text}`).join('\n\n');
   const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
