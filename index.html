@@ -640,6 +640,7 @@ async function uploadFinalData() {
   const url = document.getElementById('gasUrl').value.trim();
 
   const payload = {
+    mode: 'complete',
     name: name,
     affiliation: affiliation,
     sessionId: sessionId,
