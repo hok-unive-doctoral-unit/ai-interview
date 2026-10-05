@@ -527,7 +527,7 @@ backBtn.addEventListener('click', () => {
 });
 
 // 深掘り質問取得関数（JSON通信化でGASと整合性確保）
-async function fetchAIFollowup(userAnswer, retries = 1) {
+async function fetchAIFollowup(userAnswer, retries = 3) {
   const url = document.getElementById('gasUrl').value.trim();
   
   for (let attempt = 0; attempt <= retries; attempt++) {
