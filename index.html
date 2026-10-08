@@ -97,83 +97,141 @@
     font-weight: 600;
   }
 
+  /* ★修正3：質問ボックスの構造簡素化 */
   .question-box {
     background: #eef5fc;
-    border-left: 5px solid var(--primary);
-    border-radius: 8px;
     padding: 16px;
-    margin-bottom: 20px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--primary);
   }
-  .question-title { font-size: 12px; color: var(--primary); font-weight: bold; margin-bottom: 4px; }
-  .question-text { font-size: 16px; font-weight: bold; color: #1a252f; line-height: 1.5; }
+  #questionText {
+    font-size: 15px;
+    color: #1a252f;
+    line-height: 1.6;
+    margin: 0;
+  }
 
+  /* ★修正4：テキストエリア伸縮対応 */
   textarea {
     width: 100%;
-    height: 110px;
-    padding: 12px;
-    border: 1px solid #ccc;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
     border-radius: 8px;
     font-size: 14px;
-    box-sizing: border-box;
-    resize: vertical;
     font-family: inherit;
+    resize: vertical;
+    min-height: 60px;
+    box-sizing: border-box;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(44, 77, 117, 0.1);
   }
 
+  /* ★修正2：ボタングループレイアウト（grid 3列配置） */
   .button-group {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 18px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 12px;
   }
   button {
+    padding: 10px 12px;
     border: none;
-    padding: 12px 20px;
     border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-width: 100px;
   }
-  .btn-mic { background: var(--accent-red); color: #fff; }
-  .btn-mic:hover { background: #c0392b; }
-  .btn-primary { background: var(--primary); color: #fff; }
-  .btn-primary:hover { background: var(--primary-hover); }
-  .btn-secondary { background: #5a738e; color: #fff; }
-  .btn-secondary:hover { background: #485c72; }
-  .btn-skip { background: #7f8c8d; color: #fff; }
-  .btn-skip:hover { background: #687576; }
-  button:disabled { background: #bdc3c7 !important; cursor: not-allowed; opacity: 0.7; }
+  /* ★修正6：ボタン定義の整理（ID指定） */
+  #micToggleBtn {
+    background: #3498db;
+    color: white;
+  }
+  #micToggleBtn:hover:not(:disabled) { background: #2980b9; }
+  #submitBtn {
+    background: var(--primary);
+    color: white;
+  }
+  #submitBtn:hover:not(:disabled) { background: var(--primary-hover); }
+  #skipBtn {
+    background: #95a5a6;
+    color: white;
+  }
+  #skipBtn:hover:not(:disabled) { background: #7f8c8d; }
+  #backBtn {
+    background: #f39c12;
+    color: white;
+  }
+  #backBtn:hover:not(:disabled) { background: #e67e22; }
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   .progress-container { margin-top: 24px; text-align: center; }
   .progress-bar { height: 6px; background: #e0e0e0; border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
   .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s; }
   .progress-text { font-size: 12px; color: #7f8c8d; }
 
-  .hidden { display: none !important; }
+  /* ★修正1：セクション表示管理 */
+  .section { display: none; }
+  .section:not(.section-hidden) { display: block; }
+  .section-hidden { display: none !important; }
   
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
-  .form-group input[type="text"] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
-  
+  /* ★修正5：フォーム入力グループの統一 */
+  .input-group {
+    margin-bottom: 16px;
+  }
+  .input-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #333;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+  .input-group input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(44, 77, 117, 0.1);
+  }
+
+  /* ★修正10：チェックボックスグループ（新規追加） */
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+  .checkbox-group label {
+    margin: 0;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
   .status-card {
     background: #fcf8e3;
     border: 1px solid #faebcc;
     border-radius: 8px;
     padding: 16px;
     margin: 20px 0;
-  }
-
-  .notice-text {
-    font-size: 12px;
-    color: #666;
-    margin-top: 12px;
-    line-height: 1.4;
   }
 
   .status-loading {
@@ -200,7 +258,7 @@
   <div class="content">
 
     <!-- 1. 初期設定画面 -->
-    <div id="setupSection">
+    <div id="setupSection" class="section">
       <div class="top-welcome">
         <img src="avatar_close.jpg" alt="AI Interviewer" class="top-avatar">
         <div class="top-speech-bubble">
@@ -209,36 +267,41 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label>お名前:</label>
-        <input type="text" id="intervieweeName" placeholder="例: 山田 太郎">
-      </div>
-      <div class="form-group">
-        <label>ご所属 (大学・機関名等):</label>
-        <input type="text" id="intervieweeAffiliation" placeholder="例: ○○大学 大学院">
-      </div>
-      <div class="form-group" style="margin-top: 16px;">
-        <label style="font-weight: normal; font-size: 13px;">
-          <input type="checkbox" id="enableSpeech" checked> AIの質問を音声で読み上げる
-        </label>
-        <label style="font-weight: normal; font-size: 13px; margin-top: 6px;">
-          <input type="checkbox" id="consent"> 録音・文字起こし・データ保存に同意します
-        </label>
+      <!-- ★修正11：setupSection見出し追加 -->
+      <h2 style="color: var(--primary); font-size: 18px; margin-top: 0;">インタビューの準備</h2>
+      <p style="font-size: 13px; color: #555;">インタビューを始める前に、簡単な情報をご入力ください。</p>
+
+      <!-- ★修正5：フォーム入力グループの統一 -->
+      <div class="input-group">
+        <label for="intervieweeName">お名前（必須）</label>
+        <input type="text" id="intervieweeName" placeholder="例：田中太郎">
       </div>
 
-      <div class="notice-text">
-        ※ インタビュー開始後、ブラウザからマイクの使用許可を求められた場合は「許可」を選択してください。
+      <div class="input-group">
+        <label for="intervieweeAffiliation">ご所属・お立場</label>
+        <input type="text" id="intervieweeAffiliation" placeholder="例：北海道大学 キャリアデザインセンター">
+      </div>
+
+      <!-- ★修正10：チェックボックスグループ（新規） -->
+      <div class="checkbox-group">
+        <input type="checkbox" id="consent">
+        <label for="consent">インタビュー内容の記録とWeb記事の自動生成に同意します</label>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="enableSpeech" checked>
+        <label for="enableSpeech">AIの質問を音声で読み上げる（チェックなしでも音声読み上げ無しで進められます）</label>
       </div>
 
       <input type="hidden" id="gasUrl" value="https://script.google.com/macros/s/AKfycbzKN7xQSiqHD-rEwjhJfEGHloe72734D8t8al1SVN5shtgD4ECYXps2aZgQ3MrfIkKC/exec">
 
-      <div style="text-align: center; margin-top: 20px;">
-        <button id="startBtn" class="btn-primary" disabled style="width: 100%; padding: 14px;">インタビューを開始する</button>
-      </div>
+      <button id="startBtn" style="width: 100%; background: var(--primary); color: white; padding: 12px; font-size: 16px; margin-top: 16px;" disabled>
+        📋 インタビューを開始
+      </button>
     </div>
 
     <!-- 2. インタビュー対話画面 -->
-    <div id="interviewSection" class="hidden">
+    <div id="interviewSection" class="section section-hidden">
       <div class="avatar-container">
         <div class="avatar-wrapper">
           <img src="avatar_close.jpg" alt="AI Interviewer" class="avatar-img" id="avatarImg">
@@ -246,18 +309,24 @@
         <div class="avatar-status" id="avatarStatus">回答をお待ちしています</div>
       </div>
 
+      <!-- ★修正3：質問ボックスの構造簡素化 -->
       <div class="question-box">
-        <div class="question-title">質問</div>
-        <div class="question-text" id="questionText">読み込み中...</div>
+        <p id="questionText"></p>
       </div>
 
-      <textarea id="answerInput" placeholder="ここに回答を入力するか、マイクボタンを押してお話しください... (Ctrl + Enterで進む)"></textarea>
+      <!-- ★修正4：テキストエリア伸縮対応 -->
+      <textarea id="answerInput" placeholder="こちらに回答を入力するか、🎙️話し始めるボタンをタップして音声で答えてください"></textarea>
 
+      <!-- ★修正2：ボタングループレイアウト（grid 3列） -->
       <div class="button-group">
-        <button id="micToggleBtn" class="btn-mic">🎙️ 話し始める</button>
-        <button id="submitBtn" class="btn-primary">✉️ 送信する</button>
-        <button id="backBtn" class="btn-secondary" disabled>↩️ 1つ戻る</button>
-        <button id="skipBtn" class="btn-skip">⏩ スキップ</button>
+        <button id="micToggleBtn">🎙️ 話し始める</button>
+        <button id="submitBtn">✉️ 次へ</button>
+        <button id="skipBtn">⏭️ スキップ</button>
+      </div>
+
+      <!-- 戻るボタンは別行で配置 -->
+      <div class="button-group" style="grid-template-columns: 1fr;">
+        <button id="backBtn" disabled>↩️ 戻る</button>
       </div>
 
       <div class="progress-container">
@@ -267,7 +336,7 @@
     </div>
 
     <!-- 3. インタビュー終了画面 -->
-    <div id="finishSection" class="hidden" style="text-align: center;">
+    <div id="finishSection" class="section section-hidden" style="text-align: center;">
       <h2 style="color: var(--primary);">🎉 インタビューが終了しました</h2>
       <p style="font-size: 14px; color: #555;">ご協力ありがとうございました。</p>
       
@@ -468,8 +537,8 @@ micToggleBtn.addEventListener('click', () => {
 
 // ===== 対話制御ロジック =====
 startBtn.addEventListener('click', () => {
-  setupSection.classList.add('hidden');
-  interviewSection.classList.remove('hidden');
+  setupSection.classList.add('section-hidden');
+  interviewSection.classList.remove('section-hidden');
   sessionId = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 15);
   qIndex = 0;
   askCurrent();
@@ -483,11 +552,12 @@ async function askCurrent() {
   progressText.textContent = `質問 ${qIndex + 1} / ${total}`;
   progressFill.style.width = `${((qIndex + 1) / total) * 100}%`;
 
+  // ★修正：ボタンテキスト Q6で「送信」、Q1～Q5で「次へ」に分岐
   const submitBtn = document.getElementById('submitBtn');
   if (qIndex === total - 1) {
-    submitBtn.innerHTML = '✉️ 送信する';
+    submitBtn.textContent = '✉️ 送信';
   } else {
-    submitBtn.innerHTML = '✉️ 次へ';
+    submitBtn.textContent = '✉️ 次へ';
   }
 
   backBtn.disabled = (transcript.length === 0);
@@ -608,8 +678,8 @@ async function processAnswer(answer) {
     if (qIndex < QUESTION_SET.length) {
       askCurrent();
     } else {
-      interviewSection.classList.add('hidden');
-      finishSection.classList.remove('hidden');
+      interviewSection.classList.add('section-hidden');
+      finishSection.classList.remove('section-hidden');
       
       uploadFinalData();
       await speak('ご回答ありがとうございました。インタビューは以上となります。ただいまデータを保存しておりますので、完了までそのまま少々お待ちください。');
@@ -639,12 +709,17 @@ async function uploadFinalData() {
   const affiliation = document.getElementById('intervieweeAffiliation').value.trim();
   const url = document.getElementById('gasUrl').value.trim();
 
+  // ★修正：speaker='回答者'の回答のみを配列で抽出
+  const answers = transcript
+    .filter(t => t.speaker === '回答者')
+    .map(t => t.text);
+
   const payload = {
     mode: 'complete',
     name: name,
     affiliation: affiliation,
     sessionId: sessionId,
-    transcript: transcript.map(t => `【${t.speaker}】${t.text}`).join('\n\n')
+    answers: answers  // ★修正：answers 配列を送信
   };
 
   const controller = new AbortController();
