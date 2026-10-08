@@ -315,7 +315,8 @@
       </div>
 
       <!-- ★修正4：テキストエリア伸縮対応 -->
-      <textarea id="answerInput" placeholder="こちらに回答を入力するか、🎙️話し始めるボタンをタップして音声で答えてください"></textarea>
+      <!-- ★修正：autocomplete="off" で文字数表示を防止 -->
+      <textarea id="answerInput" placeholder="こちらに回答を入力するか、🎙️話し始めるボタンをタップして音声で答えてください" autocomplete="off"></textarea>
 
       <!-- ★修正2：ボタングループレイアウト（grid 3列） -->
       <div class="button-group">
@@ -446,14 +447,11 @@ function stopLipSync() {
 // ===== 音声合成（TTS） =====
 function speak(text) {
   return new Promise(resolve => {
-    console.log('【speak関数 実行】enableSpeech:', document.getElementById('enableSpeech').checked);
     
     if (!document.getElementById('enableSpeech').checked || !('speechSynthesis' in window)) {
-      console.log('【speak関数 スキップ】speechSynthesisが未対応またはチェックなし');
       resolve();
       return;
     }
-    console.log('【speak関数 音声再生開始】');
     speechSynthesis.cancel();
 
     const u = new SpeechSynthesisUtterance(text);
@@ -463,14 +461,6 @@ function speak(text) {
 
     const voices = speechSynthesis.getVoices();
     
-    // ★修正：利用可能な日本語音声をデバッグ出力
-    const jaVoices = voices.filter(v => v.lang.includes('ja'));
-    console.log('【利用可能な全音声数】', voices.length, '【日本語音声数】', jaVoices.length);
-    if (jaVoices.length > 0 && !window.voiceDebugLogged) {
-      console.log('【利用可能な日本語音声】', jaVoices.map(v => v.name));
-      window.voiceDebugLogged = true;
-    }
-    
     // ★修正：男性声優先 - Microsoft Ichiro（実測で確認済み）→ その他 → フォールバック
     const jaVoice = voices.find(v => v.lang.includes('ja') && v.name.includes('Ichiro')) ||
                     voices.find(v => v.lang.includes('ja') && (v.name.includes('Otoya') || v.name.includes('Hachiman'))) ||
@@ -478,7 +468,6 @@ function speak(text) {
                     voices.find(v => v.lang.includes('ja'));
     if (jaVoice) {
       u.voice = jaVoice;
-      console.log('【選択した音声】', jaVoice.name);
     }
 
     let hasEnded = false;
@@ -665,7 +654,6 @@ async function fetchAIFollowup(userAnswer) {
     }
   } catch (e) {
     clearTimeout(timeoutId);
-    console.warn('Followup Fetch Error:', e);
 
     // タイムアウト（60秒経過）または通信失敗時のみフォールバック文を返す
     return "ご回答ありがとうございます！その点について、具体的に印象に残っているエピソードなどはありますか？";
@@ -720,7 +708,6 @@ async function processAnswer(answer) {
       await speak('ご回答ありがとうございました。インタビューは以上となります。ただいまデータを保存しておりますので、完了までそのまま少々お待ちください。');
     }
   } catch (err) {
-    console.error('Error in processAnswer:', err);
     alert('通信に一時的な問題が発生しました。再度送信をお試しいただくか、次の質問へお進みください。');
   } finally {
     isProcessing = false;
@@ -785,7 +772,6 @@ async function uploadFinalData() {
       }
     }
   } catch (e) {
-    console.error('Data upload error / timeout:', e);
   } finally {
     clearTimeout(timeoutId);
     isSavingCompleted = true;
