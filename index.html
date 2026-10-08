@@ -260,7 +260,7 @@
     <!-- 1. 初期設定画面 -->
     <div id="setupSection" class="section">
       <div class="top-welcome">
-        <img src="avatar_close.jpg" alt="AI Interviewer" class="top-avatar">
+        <img src="https://hok-unive-doctoral-unit.github.io/ai-interview/avatar_close.jpg" alt="AI Interviewer" class="top-avatar">
         <div class="top-speech-bubble">
           こんにちは！博士のキャリア支援に関するお話をインタビューさせていただきます。<br>
           質問は全6問です。音声またはテキストでお気軽にお答えください。
@@ -304,7 +304,7 @@
     <div id="interviewSection" class="section section-hidden">
       <div class="avatar-container">
         <div class="avatar-wrapper">
-          <img src="avatar_close.jpg" alt="AI Interviewer" class="avatar-img" id="avatarImg">
+          <img src="https://hok-unive-doctoral-unit.github.io/ai-interview/avatar_close.jpg" alt="AI Interviewer" class="avatar-img" id="avatarImg">
         </div>
         <div class="avatar-status" id="avatarStatus">回答をお待ちしています</div>
       </div>
@@ -424,7 +424,7 @@ window.addEventListener('beforeunload', (e) => {
 // ===== 口パク（リップシンク）アニメーション =====
 function startLipSync() {
   stopLipSync();
-  const sequence = ['avatar_close.jpg', 'avatar_half.jpg', 'avatar_open.jpg', 'avatar_half.jpg'];
+  const sequence = ['https://hok-unive-doctoral-unit.github.io/ai-interview/avatar_close.jpg', 'https://hok-unive-doctoral-unit.github.io/ai-interview/avatar_half.jpg', 'https://hok-unive-doctoral-unit.github.io/ai-interview/avatar_open.jpg', 'https://hok-unive-doctoral-unit.github.io/ai-interview/avatar_half.jpg'];
   let frameIndex = 0;
 
   function loop() {
@@ -440,16 +440,20 @@ function stopLipSync() {
     clearTimeout(lipSyncTimeout);
     lipSyncTimeout = null;
   }
-  avatarImg.src = 'avatar_close.jpg';
+  avatarImg.src = 'https://hok-unive-doctoral-unit.github.io/ai-interview/avatar_close.jpg';
 }
 
 // ===== 音声合成（TTS） =====
 function speak(text) {
   return new Promise(resolve => {
+    console.log('【speak関数 実行】enableSpeech:', document.getElementById('enableSpeech').checked);
+    
     if (!document.getElementById('enableSpeech').checked || !('speechSynthesis' in window)) {
+      console.log('【speak関数 スキップ】speechSynthesisが未対応またはチェックなし');
       resolve();
       return;
     }
+    console.log('【speak関数 音声再生開始】');
     speechSynthesis.cancel();
 
     const u = new SpeechSynthesisUtterance(text);
@@ -458,11 +462,24 @@ function speak(text) {
     u.pitch = 1.0;
 
     const voices = speechSynthesis.getVoices();
-    // ★修正：男性声（Otoya）を優先、次にGoogle/Natural、最後にフォールバック
-    const jaVoice = voices.find(v => v.lang.includes('ja') && v.name.includes('Otoya')) ||
+    
+    // ★修正：利用可能な日本語音声をデバッグ出力
+    const jaVoices = voices.filter(v => v.lang.includes('ja'));
+    console.log('【利用可能な全音声数】', voices.length, '【日本語音声数】', jaVoices.length);
+    if (jaVoices.length > 0 && !window.voiceDebugLogged) {
+      console.log('【利用可能な日本語音声】', jaVoices.map(v => v.name));
+      window.voiceDebugLogged = true;
+    }
+    
+    // ★修正：男性声優先 - Microsoft Ichiro（実測で確認済み）→ その他 → フォールバック
+    const jaVoice = voices.find(v => v.lang.includes('ja') && v.name.includes('Ichiro')) ||
+                    voices.find(v => v.lang.includes('ja') && (v.name.includes('Otoya') || v.name.includes('Hachiman'))) ||
                     voices.find(v => v.lang.includes('ja') && (v.name.includes('Google') || v.name.includes('Natural'))) ||
                     voices.find(v => v.lang.includes('ja'));
-    if (jaVoice) u.voice = jaVoice;
+    if (jaVoice) {
+      u.voice = jaVoice;
+      console.log('【選択した音声】', jaVoice.name);
+    }
 
     let hasEnded = false;
     const endHandler = () => {
@@ -485,12 +502,12 @@ function speak(text) {
       }
     }, 100);
 
-    // ★修正：セーフティタイムアウトを5秒に短縮（実際の質問はほぼ5秒以内）
+    // ★修正：セーフティタイムアウトを30秒に延長（長い質問にも対応）
     setTimeout(() => {
       if (!hasEnded) {
         endHandler();
       }
-    }, 5000);
+    }, 30000);
 
     speechSynthesis.speak(u);
   });
