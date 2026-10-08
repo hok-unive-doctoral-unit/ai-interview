@@ -347,10 +347,10 @@
         </p>
       </div>
 
-      <!-- ★修正：完了画面のボタンは修正前のクラス指定を保持 -->
-      <div class="button-group" style="flex-direction: column; gap: 10px;">
-        <button id="previewBtn" style="background: var(--primary); color: white; justify-content: center; display: none;">🌐 Web掲載イメージを見る</button>
-        <button id="downloadTranscriptBtn" style="background: #95a5a6; color: white; justify-content: center;">📝 文字起こし全文をダウンロード</button>
+      <!-- ★修正：button-groupのgridをflexで上書き、縦並びに -->
+      <div class="button-group" style="display: flex; flex-direction: column; grid: none; gap: 10px;">
+        <button id="previewBtn" style="background: var(--primary); color: white; justify-content: center; display: none; width: 100%;">🌐 Web掲載イメージを見る</button>
+        <button id="downloadTranscriptBtn" style="background: #95a5a6; color: white; justify-content: center; width: 100%;">📝 文字起こし全文をダウンロード</button>
       </div>
     </div>
 
@@ -458,7 +458,10 @@ function speak(text) {
     u.pitch = 1.0;
 
     const voices = speechSynthesis.getVoices();
-    const jaVoice = voices.find(v => v.lang.includes('ja') && (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Kyoko') || v.name.includes('Otoya')));
+    // ★修正：男性声（Otoya）を優先、次にGoogle/Natural、最後にフォールバック
+    const jaVoice = voices.find(v => v.lang.includes('ja') && v.name.includes('Otoya')) ||
+                    voices.find(v => v.lang.includes('ja') && (v.name.includes('Google') || v.name.includes('Natural'))) ||
+                    voices.find(v => v.lang.includes('ja'));
     if (jaVoice) u.voice = jaVoice;
 
     let hasEnded = false;
@@ -466,6 +469,7 @@ function speak(text) {
       if (!hasEnded) {
         hasEnded = true;
         stopLipSync();
+        clearInterval(speakingMonitor);
         resolve();
       }
     };
@@ -474,7 +478,20 @@ function speak(text) {
     u.onend = endHandler;
     u.onerror = endHandler;
 
-    setTimeout(endHandler, 10000); // 10秒セーフティタイムアウト
+    // ★修正：speechSynthesis.speaking を定期監視して、再生終了を確実に検知
+    let speakingMonitor = setInterval(() => {
+      if (!speechSynthesis.speaking && !hasEnded) {
+        endHandler();
+      }
+    }, 100);
+
+    // ★修正：セーフティタイムアウトを5秒に短縮（実際の質問はほぼ5秒以内）
+    setTimeout(() => {
+      if (!hasEnded) {
+        endHandler();
+      }
+    }, 5000);
+
     speechSynthesis.speak(u);
   });
 }
