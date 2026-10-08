@@ -347,6 +347,7 @@
         </p>
       </div>
 
+      <!-- ★修正：完了画面のボタンは修正前のクラス指定を保持 -->
       <div class="button-group" style="flex-direction: column; gap: 10px;">
         <button id="previewBtn" style="background: var(--primary); color: white; justify-content: center; display: none;">🌐 Web掲載イメージを見る</button>
         <button id="downloadTranscriptBtn" style="background: #95a5a6; color: white; justify-content: center;">📝 文字起こし全文をダウンロード</button>
@@ -714,11 +715,15 @@ async function uploadFinalData() {
     .filter(t => t.speaker === '回答者')
     .map(t => t.text);
 
+  // ★修正：transcript 全文を文字列に変換（Google Drive 保存用）
+  const transcriptText = transcript.map(t => `【${t.speaker}】${t.text}`).join('\n\n');
+
   const payload = {
     mode: 'complete',
     name: name,
     affiliation: affiliation,
     sessionId: sessionId,
+    transcript: transcriptText,  // ★追加：文字起こし全文をGASに送信
     answers: answers  // ★修正：answers 配列を送信
   };
 
